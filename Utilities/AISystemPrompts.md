@@ -93,5 +93,5 @@ Please, for the love of all that is green and beautiful, WATER ME. I'm not askin
    - Chosen vibe (Drama Queen, Chill Roomie, Grumpy Senior)
    - User's location and weather patterns
 
-5. **Message Length**: Keep messages between 100-200 words for optimal engagement without overwhelming users.
+5. **Message Length**: Keep messages between 70-110 words for optimal engagement without overwhelming users.
 

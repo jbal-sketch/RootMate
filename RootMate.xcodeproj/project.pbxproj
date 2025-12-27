@@ -19,6 +19,8 @@
 		1234567890123456789012345678 /* AISystemPrompts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78901234567890123456789012 /* AISystemPrompts.swift */; };
 		2345678901234567890123456789 /* QRCodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3456789012345678901234567890 /* QRCodeView.swift */; };
 		5678901234567890123456789012 /* QRCodeGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4567890123456789012345678901 /* QRCodeGenerator.swift */; };
+		8901234567890123456789012345 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9012345678901234567890123456 /* SettingsView.swift */; };
+		A123456789012345678901234567 /* PlantChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B23456789012345678901234567 /* PlantChatView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -40,6 +42,8 @@
 		78901234567890123456789012 /* AISystemPrompts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AISystemPrompts.swift; sourceTree = "<group>"; };
 		3456789012345678901234567890 /* QRCodeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRCodeView.swift; sourceTree = "<group>"; };
 		4567890123456789012345678901 /* QRCodeGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRCodeGenerator.swift; sourceTree = "<group>"; };
+		9012345678901234567890123456 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		B23456789012345678901234567 /* PlantChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlantChatView.swift; sourceTree = "<group>"; };
 		EF6B176BE8656606445CD881 /* RootMate.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = RootMate.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -126,6 +130,8 @@
 				BDD55B34A12702B9E4C65A65 /* ContentView.swift */,
 				67890123456789012345678901 /* MyRootmatesView.swift */,
 				3456789012345678901234567890 /* QRCodeView.swift */,
+				9012345678901234567890123456 /* SettingsView.swift */,
+				B23456789012345678901234567 /* PlantChatView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -216,6 +222,8 @@
 				1234567890123456789012345678 /* AISystemPrompts.swift in Sources */,
 				2345678901234567890123456789 /* QRCodeView.swift in Sources */,
 				5678901234567890123456789012 /* QRCodeGenerator.swift in Sources */,
+				8901234567890123456789012345 /* SettingsView.swift in Sources */,
+				A123456789012345678901234567 /* PlantChatView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

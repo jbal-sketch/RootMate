@@ -8,11 +8,33 @@
 import Foundation
 import SwiftUI
 
+// Message storage for feed
+struct PlantMessage: Identifiable, Codable {
+    let id: UUID
+    let plantId: UUID
+    let plantNickname: String
+    let plantSpecies: String
+    let plantVibe: PlantVibe
+    let message: String
+    let date: Date
+    
+    init(id: UUID = UUID(), plantId: UUID, plantNickname: String, plantSpecies: String, plantVibe: PlantVibe, message: String, date: Date = Date()) {
+        self.id = id
+        self.plantId = plantId
+        self.plantNickname = plantNickname
+        self.plantSpecies = plantSpecies
+        self.plantVibe = plantVibe
+        self.message = message
+        self.date = date
+    }
+}
+
 @MainActor
 class PlantViewModel: ObservableObject {
     @Published var plants: [Plant] = []
     @Published var isLoading = false
     @Published var errorMessage: String?
+    @Published var recentMessages: [PlantMessage] = [] // Feed messages
     
     // Current user ID - in production, this would come from authentication
     let currentUserId: UUID
@@ -24,10 +46,28 @@ class PlantViewModel: ObservableObject {
         self.currentUserId = currentUserId
         // Load sample data for demo
         loadSamplePlants()
+        // Automatically load API key from UserDefaults
+        loadAPIKey()
     }
     
     func configureAI(apiKey: String) {
         aiService = AIService(apiKey: apiKey)
+    }
+    
+    private func loadAPIKey() {
+        let defaults = UserDefaults.standard
+        if let apiKey = defaults.string(forKey: "gemini_api_key"), !apiKey.isEmpty {
+            configureAI(apiKey: apiKey)
+        } else {
+            // If no API key exists, save the default one
+            let defaultApiKey = "AIzaSyBGaMbsDgg0kvsCGWBXuHF70ERjeyaQnww"
+            defaults.set(defaultApiKey, forKey: "gemini_api_key")
+            configureAI(apiKey: defaultApiKey)
+        }
+    }
+    
+    func reloadAPIKey() {
+        loadAPIKey()
     }
     
     private func loadSamplePlants() {
@@ -121,6 +161,13 @@ class PlantViewModel: ObservableObject {
     }
     
     func generateDailyMessage(for plant: Plant) async throws -> String {
+        // Check if message already exists for today
+        if hasMessageForToday(for: plant.id) {
+            if let existingMessage = getTodaysMessage(for: plant.id) {
+                return existingMessage.message
+            }
+        }
+        
         guard let aiService = aiService else {
             throw NSError(domain: "PlantViewModel", code: 1, userInfo: [NSLocalizedDescriptionKey: "AI service not configured. Please set Gemini API key in settings."])
         }
@@ -142,11 +189,47 @@ class PlantViewModel: ObservableObject {
         let systemPrompt = AISystemPrompts.getPrompt(for: plant.species, vibe: plant.vibe)
         
         // Generate the message
-        return try await aiService.generatePlantMessage(
+        let message = try await aiService.generatePlantMessage(
             plant: plant,
             weatherData: weatherData,
             systemPrompt: systemPrompt
         )
+        
+        // Store message in feed
+        let plantMessage = PlantMessage(
+            plantId: plant.id,
+            plantNickname: plant.nickname,
+            plantSpecies: plant.species,
+            plantVibe: plant.vibe,
+            message: message
+        )
+        recentMessages.insert(plantMessage, at: 0) // Add to beginning
+        // Keep only last 20 messages
+        if recentMessages.count > 20 {
+            recentMessages = Array(recentMessages.prefix(20))
+        }
+        
+        return message
+    }
+    
+    // Check if a message was already generated today for a plant
+    func hasMessageForToday(for plantId: UUID) -> Bool {
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: Date())
+        
+        return recentMessages.contains { message in
+            message.plantId == plantId && calendar.startOfDay(for: message.date) == today
+        }
+    }
+    
+    // Get today's message for a plant (if exists)
+    func getTodaysMessage(for plantId: UUID) -> PlantMessage? {
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: Date())
+        
+        return recentMessages.first { message in
+            message.plantId == plantId && calendar.startOfDay(for: message.date) == today
+        }
     }
 }
 

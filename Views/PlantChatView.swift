@@ -14,6 +14,7 @@ struct PlantChatView: View {
     @State private var message: String = ""
     @State private var isLoading: Bool = false
     @State private var errorMessage: String?
+    @State private var hasTodaysMessage: Bool = false
     
     var body: some View {
         NavigationView {
@@ -122,37 +123,63 @@ struct PlantChatView: View {
                 }
             }
             .safeAreaInset(edge: .bottom) {
-                // Generate Message Button
+                // Generate/View Message Button
                 Button(action: {
-                    Task {
-                        await generateMessage()
+                    if hasTodaysMessage, let todaysMessage = viewModel.getTodaysMessage(for: plant.id) {
+                        // Just load existing message
+                        message = todaysMessage.message
+                    } else {
+                        // Generate new message
+                        Task {
+                            await generateMessage()
+                        }
                     }
                 }) {
                     HStack {
-                        Image(systemName: "sparkles")
-                        Text("Get Today's Message")
+                        Image(systemName: hasTodaysMessage ? "bubble.left.fill" : "sparkles")
+                        Text(hasTodaysMessage ? "View Today's Message" : "Get Today's Message")
                     }
                     .font(.headline)
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity)
                     .padding()
-                    .background(Color(hex: "1B4332"))
+                    .background(hasTodaysMessage ? Color(hex: "1B4332").opacity(0.8) : Color(hex: "1B4332"))
                     .cornerRadius(12)
                 }
                 .disabled(isLoading)
                 .padding()
                 .background(Color(hex: "FDFBF7"))
             }
+            .onAppear {
+                checkForTodaysMessage()
+            }
+        }
+    }
+    
+    private func checkForTodaysMessage() {
+        hasTodaysMessage = viewModel.hasMessageForToday(for: plant.id)
+        if hasTodaysMessage, let todaysMessage = viewModel.getTodaysMessage(for: plant.id) {
+            message = todaysMessage.message
         }
     }
     
     private func generateMessage() async {
+        // Check if message already exists for today
+        if viewModel.hasMessageForToday(for: plant.id) {
+            if let todaysMessage = viewModel.getTodaysMessage(for: plant.id) {
+                message = todaysMessage.message
+                hasTodaysMessage = true
+                return
+            }
+        }
+        
         isLoading = true
         errorMessage = nil
         
         do {
             let generatedMessage = try await viewModel.generateDailyMessage(for: plant)
             message = generatedMessage
+            hasTodaysMessage = true
         } catch {
             errorMessage = error.localizedDescription
         }

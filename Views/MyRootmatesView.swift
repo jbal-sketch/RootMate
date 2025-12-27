@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import UIKit
 
 struct MyRootmatesView: View {
     @StateObject private var viewModel = PlantViewModel()
@@ -30,6 +31,9 @@ struct MyRootmatesView: View {
                 
                 ScrollView {
                     VStack(spacing: 20) {
+                        // Daily Messages Feed (Prominent!)
+                        dailyMessagesFeed
+                        
                         // Header Stats
                         headerStatsView
                         
@@ -66,7 +70,7 @@ struct MyRootmatesView: View {
                 AddPlantView(viewModel: viewModel)
             }
             .sheet(isPresented: $showingSettings) {
-                SettingsView()
+                SettingsView(viewModel: viewModel)
             }
             .sheet(isPresented: Binding(
                 get: { selectedPlantId != nil },
@@ -83,10 +87,85 @@ struct MyRootmatesView: View {
                     viewModel.configureAI(apiKey: apiKey)
                 }
             }
-            .onChange(of: appState.selectedPlantId) { newPlantId in
-                if let plantId = newPlantId {
+            .onChange(of: appState.selectedPlantId) { newValue in
+                if let plantId = newValue {
                     selectedPlantId = plantId
                     appState.selectedPlantId = nil // Reset after handling
+                }
+            }
+        }
+    }
+    
+    // MARK: - Daily Messages Feed
+    private var dailyMessagesFeed: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Text("💬 Daily Messages")
+                    .font(.title2)
+                    .fontWeight(.bold)
+                    .foregroundColor(Color(hex: "1B4332"))
+                
+                Spacer()
+                
+                if !viewModel.recentMessages.isEmpty {
+                    Button(action: {
+                        // Generate messages for all plants that don't have today's message yet
+                        Task {
+                            for plant in viewModel.plants {
+                                // Only generate if no message exists for today
+                                if !viewModel.hasMessageForToday(for: plant.id) {
+                                    do {
+                                        _ = try await viewModel.generateDailyMessage(for: plant)
+                                    } catch {
+                                        print("Failed to generate message for \(plant.nickname): \(error)")
+                                    }
+                                }
+                            }
+                        }
+                    }) {
+                        HStack(spacing: 4) {
+                            Image(systemName: "sparkles")
+                            Text("Get All")
+                        }
+                        .font(.caption)
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 6)
+                        .background(Color(hex: "1B4332"))
+                        .cornerRadius(12)
+                    }
+                }
+            }
+            .padding(.horizontal, 4)
+            
+            if viewModel.recentMessages.isEmpty {
+                // Empty state - encourage first message
+                VStack(spacing: 12) {
+                    Image(systemName: "bubble.left.and.bubble.right.fill")
+                        .font(.system(size: 40))
+                        .foregroundColor(Color(hex: "1B4332").opacity(0.3))
+                    
+                    Text("No messages yet")
+                        .font(.headline)
+                        .foregroundColor(.secondary)
+                    
+                    Text("Tap 'Get Today's Message' on any plant to start chatting!")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .multilineTextAlignment(.center)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 20)
+                .background(Color.white.opacity(0.6))
+                .cornerRadius(16)
+            } else {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 16) {
+                        ForEach(viewModel.recentMessages) { message in
+                            MessageCard(message: message, viewModel: viewModel)
+                        }
+                    }
+                    .padding(.horizontal, 4)
                 }
             }
         }
@@ -173,59 +252,81 @@ struct RootmateCard: View {
     let plant: Plant
     @ObservedObject var viewModel: PlantViewModel
     @State private var showingDetails = false
+    @State private var showingChat = false
     
     var body: some View {
-        Button(action: {
-            showingDetails = true
-        }) {
-            HStack(spacing: 16) {
-                // Plant Icon & Status
-                ZStack {
-                    Circle()
-                        .fill(statusColor.opacity(0.2))
-                        .frame(width: 60, height: 60)
-                    
-                    Text(plant.vibe.emoji)
-                        .font(.system(size: 32))
-                }
-                
-                // Plant Info
-                VStack(alignment: .leading, spacing: 6) {
-                    HStack {
-                        Text(plant.nickname)
-                            .font(.headline)
-                            .foregroundColor(Color(hex: "1B4332"))
+        VStack(spacing: 0) {
+            Button(action: {
+                showingDetails = true
+            }) {
+                HStack(spacing: 16) {
+                    // Plant Icon & Status
+                    ZStack {
+                        Circle()
+                            .fill(statusColor.opacity(0.2))
+                            .frame(width: 60, height: 60)
                         
-                        Text(plant.vibe.emoji)
-                            .font(.caption)
+                        Text(PlantSpecies.emoji(for: plant.species))
+                            .font(.system(size: 32))
                     }
                     
-                    Text(plant.species)
-                        .font(.subheadline)
+                    // Plant Info
+                    VStack(alignment: .leading, spacing: 6) {
+                        HStack {
+                            Text(plant.nickname)
+                                .font(.headline)
+                                .foregroundColor(Color(hex: "1B4332"))
+                            
+                            Text(plant.vibe.emoji)
+                                .font(.caption)
+                        }
+                        
+                        Text(plant.species)
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                        
+                        // Status Badge
+                        HStack(spacing: 8) {
+                            statusBadge
+                            healthStreakBadge
+                        }
+                    }
+                    
+                    Spacer()
+                    
+                    // Status Indicator
+                    Image(systemName: "chevron.right")
                         .foregroundColor(.secondary)
-                    
-                    // Status Badge
-                    HStack(spacing: 8) {
-                        statusBadge
-                        healthStreakBadge
-                    }
+                        .font(.caption)
                 }
-                
-                Spacer()
-                
-                // Status Indicator
-                Image(systemName: "chevron.right")
-                    .foregroundColor(.secondary)
-                    .font(.caption)
+                .padding()
+                .background(Color.white.opacity(0.9))
             }
-            .padding()
-            .background(Color.white.opacity(0.9))
-            .cornerRadius(16)
-            .shadow(color: .black.opacity(0.1), radius: 8, x: 0, y: 2)
+            .buttonStyle(PlainButtonStyle())
+            
+            // Quick Chat Button (Prominent!)
+            Button(action: {
+                showingChat = true
+            }) {
+                HStack {
+                    Image(systemName: viewModel.hasMessageForToday(for: plant.id) ? "bubble.left.fill" : "sparkles")
+                    Text(viewModel.hasMessageForToday(for: plant.id) ? "View Today's Message" : "Get Today's Message")
+                        .fontWeight(.semibold)
+                }
+                .font(.subheadline)
+                .foregroundColor(.white)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 12)
+                .background(viewModel.hasMessageForToday(for: plant.id) ? Color(hex: "1B4332").opacity(0.8) : Color(hex: "1B4332"))
+            }
         }
-        .buttonStyle(PlainButtonStyle())
+        .cornerRadius(16)
+        .shadow(color: .black.opacity(0.1), radius: 8, x: 0, y: 2)
         .sheet(isPresented: $showingDetails) {
             PlantDetailView(plantId: plant.id, viewModel: viewModel)
+        }
+        .sheet(isPresented: $showingChat) {
+            PlantChatView(plant: plant, viewModel: viewModel)
         }
     }
     
@@ -268,6 +369,88 @@ struct RootmateCard: View {
         .padding(.vertical, 4)
         .background(Color(hex: "D97706").opacity(0.15))
         .cornerRadius(8)
+    }
+}
+
+// MARK: - Message Card (for Feed)
+struct MessageCard: View {
+    let message: PlantMessage
+    @ObservedObject var viewModel: PlantViewModel
+    @State private var showingChat = false
+    
+    var body: some View {
+        Button(action: {
+            if let plant = viewModel.plants.first(where: { $0.id == message.plantId }) {
+                showingChat = true
+            }
+        }) {
+            VStack(alignment: .leading, spacing: 12) {
+                // Plant Header
+                HStack(spacing: 8) {
+                    Text(PlantSpecies.emoji(for: message.plantSpecies))
+                        .font(.title2)
+                    
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(message.plantNickname)
+                            .font(.headline)
+                            .foregroundColor(Color(hex: "1B4332"))
+                        
+                        HStack(spacing: 4) {
+                            Text(message.plantVibe.emoji)
+                                .font(.caption)
+                            Text(message.plantSpecies)
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                    
+                    Spacer()
+                }
+                
+                // Message Preview
+                Text(message.message)
+                    .font(.subheadline)
+                    .foregroundColor(.primary)
+                    .lineLimit(3)
+                    .multilineTextAlignment(.leading)
+                
+                // Timestamp
+                HStack {
+                    Image(systemName: "clock")
+                        .font(.caption2)
+                    Text(timeAgoString(from: message.date))
+                        .font(.caption2)
+                }
+                .foregroundColor(.secondary)
+            }
+            .padding()
+            .frame(width: 280)
+            .background(Color.white.opacity(0.95))
+            .cornerRadius(16)
+            .shadow(color: .black.opacity(0.1), radius: 4, x: 0, y: 2)
+        }
+        .buttonStyle(PlainButtonStyle())
+        .sheet(isPresented: $showingChat) {
+            if let plant = viewModel.plants.first(where: { $0.id == message.plantId }) {
+                PlantChatView(plant: plant, viewModel: viewModel)
+            }
+        }
+    }
+    
+    private func timeAgoString(from date: Date) -> String {
+        let calendar = Calendar.current
+        let now = Date()
+        let components = calendar.dateComponents([.minute, .hour, .day], from: date, to: now)
+        
+        if let day = components.day, day > 0 {
+            return "\(day)d ago"
+        } else if let hour = components.hour, hour > 0 {
+            return "\(hour)h ago"
+        } else if let minute = components.minute, minute > 0 {
+            return "\(minute)m ago"
+        } else {
+            return "Just now"
+        }
     }
 }
 
@@ -538,21 +721,45 @@ struct AddPlantView: View {
             Form {
                 Section("Plant Details") {
                     TextField("Nickname", text: $nickname)
-                    Picker("Species", selection: $selectedSpecies) {
-                        ForEach(PlantSpecies.commonSpecies, id: \.self) { species in
-                            HStack {
-                                Text(PlantSpecies.emoji(for: species))
-                                Text(species)
-                            }.tag(species)
+                    HStack {
+                        Text("Species")
+                        Spacer()
+                        Picker("", selection: $selectedSpecies) {
+                            ForEach(PlantSpecies.commonSpecies, id: \.self) { species in
+                                HStack {
+                                    Text(PlantSpecies.emoji(for: species))
+                                    Text(species)
+                                }
+                                .tag(species)
+                            }
                         }
+                        .pickerStyle(.menu)
+                        .labelsHidden()
                     }
-                    Picker("Vibe", selection: $selectedVibe) {
-                        ForEach(PlantVibe.allCases, id: \.self) { vibe in
-                            HStack {
-                                Text(vibe.emoji)
-                                Text(vibe.rawValue)
-                            }.tag(vibe)
+                    HStack {
+                        Text("Selected: \(PlantSpecies.emoji(for: selectedSpecies)) \(selectedSpecies)")
+                            .foregroundColor(.secondary)
+                            .font(.caption)
+                    }
+                    HStack {
+                        Text("Vibe")
+                        Spacer()
+                        Picker("", selection: $selectedVibe) {
+                            ForEach(PlantVibe.allCases, id: \.self) { vibe in
+                                HStack {
+                                    Text(vibe.emoji)
+                                    Text(vibe.rawValue)
+                                }
+                                .tag(vibe)
+                            }
                         }
+                        .pickerStyle(.menu)
+                        .labelsHidden()
+                    }
+                    HStack {
+                        Text("Selected: \(selectedVibe.emoji) \(selectedVibe.rawValue)")
+                            .foregroundColor(.secondary)
+                            .font(.caption)
                     }
                 }
                 
@@ -617,21 +824,45 @@ struct EditPlantView: View {
             Form {
                 Section("Plant Details") {
                     TextField("Nickname", text: $nickname)
-                    Picker("Species", selection: $selectedSpecies) {
-                        ForEach(PlantSpecies.commonSpecies, id: \.self) { species in
-                            HStack {
-                                Text(PlantSpecies.emoji(for: species))
-                                Text(species)
-                            }.tag(species)
+                    HStack {
+                        Text("Species")
+                        Spacer()
+                        Picker("", selection: $selectedSpecies) {
+                            ForEach(PlantSpecies.commonSpecies, id: \.self) { species in
+                                HStack {
+                                    Text(PlantSpecies.emoji(for: species))
+                                    Text(species)
+                                }
+                                .tag(species)
+                            }
                         }
+                        .pickerStyle(.menu)
+                        .labelsHidden()
                     }
-                    Picker("Vibe", selection: $selectedVibe) {
-                        ForEach(PlantVibe.allCases, id: \.self) { vibe in
-                            HStack {
-                                Text(vibe.emoji)
-                                Text(vibe.rawValue)
-                            }.tag(vibe)
+                    HStack {
+                        Text("Selected: \(PlantSpecies.emoji(for: selectedSpecies)) \(selectedSpecies)")
+                            .foregroundColor(.secondary)
+                            .font(.caption)
+                    }
+                    HStack {
+                        Text("Vibe")
+                        Spacer()
+                        Picker("", selection: $selectedVibe) {
+                            ForEach(PlantVibe.allCases, id: \.self) { vibe in
+                                HStack {
+                                    Text(vibe.emoji)
+                                    Text(vibe.rawValue)
+                                }
+                                .tag(vibe)
+                            }
                         }
+                        .pickerStyle(.menu)
+                        .labelsHidden()
+                    }
+                    HStack {
+                        Text("Selected: \(selectedVibe.emoji) \(selectedVibe.rawValue)")
+                            .foregroundColor(.secondary)
+                            .font(.caption)
                     }
                 }
                 

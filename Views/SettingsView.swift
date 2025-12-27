@@ -10,12 +10,14 @@ import SwiftUI
 struct SettingsView: View {
     @State private var notificationTime: Date
     @Environment(\.dismiss) var dismiss
+    @ObservedObject var viewModel: PlantViewModel
     
     private let notificationTimeKey = "notificationTime"
     
     @State private var apiKey: String
     
-    init() {
+    init(viewModel: PlantViewModel) {
+        self.viewModel = viewModel
         // Load saved API key or set default (pre-populate if not set)
         let savedApiKey = UserDefaults.standard.string(forKey: "gemini_api_key") ?? "AIzaSyBGaMbsDgg0kvsCGWBXuHF70ERjeyaQnww"
         if UserDefaults.standard.string(forKey: "gemini_api_key") == nil {
@@ -84,6 +86,9 @@ struct SettingsView: View {
         // Save API key
         UserDefaults.standard.set(apiKey, forKey: "gemini_api_key")
         
+        // Reload API key in view model
+        viewModel.reloadAPIKey()
+        
         // Extract just the time components and save
         let calendar = Calendar.current
         let hour = calendar.component(.hour, from: notificationTime)
@@ -96,6 +101,6 @@ struct SettingsView: View {
 }
 
 #Preview {
-    SettingsView()
+    SettingsView(viewModel: PlantViewModel())
 }
 
