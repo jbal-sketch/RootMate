@@ -17,6 +17,8 @@
 		E1F2345678901234567890123456 /* AIService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6789012345678901234567890 /* AIService.swift */; };
 		F12345678901234567890123456 /* MyRoommatesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67890123456789012345678901 /* MyRoommatesView.swift */; };
 		1234567890123456789012345678 /* AISystemPrompts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78901234567890123456789012 /* AISystemPrompts.swift */; };
+		2345678901234567890123456789 /* QRCodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3456789012345678901234567890 /* QRCodeView.swift */; };
+		5678901234567890123456789012 /* QRCodeGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4567890123456789012345678901 /* QRCodeGenerator.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -36,6 +38,8 @@
 		F6789012345678901234567890 /* AIService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIService.swift; sourceTree = "<group>"; };
 		67890123456789012345678901 /* MyRoommatesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyRoommatesView.swift; sourceTree = "<group>"; };
 		78901234567890123456789012 /* AISystemPrompts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AISystemPrompts.swift; sourceTree = "<group>"; };
+		3456789012345678901234567890 /* QRCodeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRCodeView.swift; sourceTree = "<group>"; };
+		4567890123456789012345678901 /* QRCodeGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRCodeGenerator.swift; sourceTree = "<group>"; };
 		EF6B176BE8656606445CD881 /* RootMate.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = RootMate.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -121,6 +125,7 @@
 			children = (
 				BDD55B34A12702B9E4C65A65 /* ContentView.swift */,
 				67890123456789012345678901 /* MyRoommatesView.swift */,
+				3456789012345678901234567890 /* QRCodeView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -130,6 +135,7 @@
 			children = (
 				075E31D4942F9BA051BEEAAA /* .gitkeep */,
 				78901234567890123456789012 /* AISystemPrompts.swift */,
+				4567890123456789012345678901 /* QRCodeGenerator.swift */,
 			);
 			path = Utilities;
 			sourceTree = "<group>";
@@ -208,6 +214,8 @@
 				E1F2345678901234567890123456 /* AIService.swift in Sources */,
 				F12345678901234567890123456 /* MyRoommatesView.swift in Sources */,
 				1234567890123456789012345678 /* AISystemPrompts.swift in Sources */,
+				2345678901234567890123456789 /* QRCodeView.swift in Sources */,
+				5678901234567890123456789012 /* QRCodeGenerator.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

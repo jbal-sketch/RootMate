@@ -65,6 +65,7 @@ enum PlantStatus: String, Codable {
 
 struct Plant: Identifiable, Codable {
     let id: UUID
+    let userId: UUID // Foreign key to User (many-to-one relationship)
     var nickname: String
     var species: String
     var vibe: PlantVibe
@@ -76,6 +77,7 @@ struct Plant: Identifiable, Codable {
     
     init(
         id: UUID = UUID(),
+        userId: UUID,
         nickname: String,
         species: String,
         vibe: PlantVibe,
@@ -86,6 +88,7 @@ struct Plant: Identifiable, Codable {
         location: String? = nil
     ) {
         self.id = id
+        self.userId = userId
         self.nickname = nickname
         self.species = species
         self.vibe = vibe

@@ -35,7 +35,8 @@ enum SubscriptionTier: String, Codable {
     }
 }
 
-struct User: Codable {
+struct User: Identifiable, Codable {
+    let id: UUID
     var name: String
     var email: String
     var location: String // For weather API
@@ -43,12 +44,14 @@ struct User: Codable {
     var plants: [Plant]
     
     init(
+        id: UUID = UUID(),
         name: String,
         email: String,
         location: String,
         subscriptionTier: SubscriptionTier = .sprout,
         plants: [Plant] = []
     ) {
+        self.id = id
         self.name = name
         self.email = email
         self.location = location

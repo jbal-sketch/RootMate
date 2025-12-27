@@ -280,6 +280,9 @@ struct PlantDetailView: View {
                     // Status Info
                     statusSection
                     
+                    // QR Code
+                    QRCodeView(plant: plant)
+                    
                     // Actions
                     actionButtons
                 }
@@ -431,10 +434,14 @@ struct AddPlantView: View {
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Add") {
+                        let plantId = UUID()
                         let newPlant = Plant(
+                            id: plantId,
+                            userId: viewModel.currentUserId,
                             nickname: nickname.isEmpty ? selectedSpecies : nickname,
                             species: selectedSpecies,
-                            vibe: selectedVibe
+                            vibe: selectedVibe,
+                            qrCode: plantId.uuidString // Generate QR code identifier
                         )
                         viewModel.addPlant(newPlant)
                         dismiss()

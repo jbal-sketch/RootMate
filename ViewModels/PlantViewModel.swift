@@ -14,10 +14,14 @@ class PlantViewModel: ObservableObject {
     @Published var isLoading = false
     @Published var errorMessage: String?
     
+    // Current user ID - in production, this would come from authentication
+    let currentUserId: UUID
+    
     private let weatherService = WeatherService()
     private var aiService: AIService?
     
-    init() {
+    init(currentUserId: UUID = UUID()) {
+        self.currentUserId = currentUserId
         // Load sample data for demo
         loadSamplePlants()
     }
@@ -29,6 +33,7 @@ class PlantViewModel: ObservableObject {
     private func loadSamplePlants() {
         plants = [
             Plant(
+                userId: currentUserId,
                 nickname: "Fiona",
                 species: "Fiddle Leaf Fig",
                 vibe: .dramaQueen,
@@ -38,6 +43,7 @@ class PlantViewModel: ObservableObject {
                 location: "Edinburgh, Scotland"
             ),
             Plant(
+                userId: currentUserId,
                 nickname: "Basil",
                 species: "Basil",
                 vibe: .chillRoomie,
@@ -47,6 +53,7 @@ class PlantViewModel: ObservableObject {
                 location: "Edinburgh, Scotland"
             ),
             Plant(
+                userId: currentUserId,
                 nickname: "Winston",
                 species: "Snake Plant",
                 vibe: .grumpySenior,
@@ -59,7 +66,13 @@ class PlantViewModel: ObservableObject {
     }
     
     func addPlant(_ plant: Plant) {
-        plants.append(plant)
+        // Generate QR code for the plant if it doesn't have one
+        var plantWithQR = plant
+        if plantWithQR.qrCode == nil {
+            // Generate a unique QR code identifier using the plant's UUID
+            plantWithQR.qrCode = plant.id.uuidString
+        }
+        plants.append(plantWithQR)
     }
     
     func updatePlantStatus(_ plantId: UUID) {
