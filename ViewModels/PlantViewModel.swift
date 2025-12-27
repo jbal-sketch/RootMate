@@ -111,26 +111,27 @@ class PlantViewModel: ObservableObject {
         }
     }
     
-    func updatePlant(_ plantId: UUID, nickname: String, species: String, vibe: PlantVibe) {
+    func updatePlant(_ plantId: UUID, nickname: String, species: String, vibe: PlantVibe, location: String? = nil) {
         if let index = plants.firstIndex(where: { $0.id == plantId }) {
             plants[index].nickname = nickname
             plants[index].species = species
             plants[index].vibe = vibe
+            plants[index].location = location
         }
     }
     
     func generateDailyMessage(for plant: Plant) async throws -> String {
         guard let aiService = aiService else {
-            throw NSError(domain: "PlantViewModel", code: 1, userInfo: [NSLocalizedDescriptionKey: "AI service not configured. Please set OpenAI API key in settings."])
+            throw NSError(domain: "PlantViewModel", code: 1, userInfo: [NSLocalizedDescriptionKey: "AI service not configured. Please set Gemini API key in settings."])
         }
         
-        // Get weather data if location is available
+        // Get weather data if plant has a location set
         var weatherData: WeatherData? = nil
         if let location = plant.location {
-            // For testing, we'll use Edinburgh coordinates
-            // In production, you'd geocode the location string
+            // Get coordinates for the location, then fetch weather
             do {
-                weatherData = try await weatherService.getWeather(latitude: 55.9533, longitude: -3.1883)
+                let coordinates = try await weatherService.getCoordinates(for: location)
+                weatherData = try await weatherService.fetchWeather(latitude: coordinates.latitude, longitude: coordinates.longitude)
             } catch {
                 // Continue without weather data if fetch fails
                 print("Failed to fetch weather: \(error)")

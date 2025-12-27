@@ -81,9 +81,6 @@ struct MyRootmatesView: View {
                 // Configure AI if API key is available
                 if let apiKey = UserDefaults.standard.string(forKey: "gemini_api_key"), !apiKey.isEmpty {
                     viewModel.configureAI(apiKey: apiKey)
-                } else {
-                    // TEMPORARY: Quick test API key - REMOVE BEFORE COMMITTING
-                    viewModel.configureAI(apiKey: "AIzaSyBGaMbsDgg0kvsCGWBXuHF70ERjeyaQnww")
                 }
             }
             .onChange(of: appState.selectedPlantId) { newPlantId in
@@ -534,6 +531,7 @@ struct AddPlantView: View {
     @State private var nickname = ""
     @State private var selectedSpecies = "Fiddle Leaf Fig"
     @State private var selectedVibe: PlantVibe = .dramaQueen
+    @State private var cityLocation = ""
     
     var body: some View {
         NavigationView {
@@ -557,6 +555,15 @@ struct AddPlantView: View {
                         }
                     }
                 }
+                
+                Section("Location") {
+                    TextField("City (e.g., Edinburgh, Scotland)", text: $cityLocation)
+                        .autocapitalization(.words)
+                    
+                    Text("Enter your city for weather-aware plant messages")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
             }
             .navigationTitle("Add Plant")
             .navigationBarTitleDisplayMode(.inline)
@@ -573,7 +580,8 @@ struct AddPlantView: View {
                             nickname: nickname.isEmpty ? selectedSpecies : nickname,
                             species: selectedSpecies,
                             vibe: selectedVibe,
-                            qrCode: plantId.uuidString // Generate QR code identifier
+                            qrCode: plantId.uuidString, // Generate QR code identifier
+                            location: cityLocation.isEmpty ? nil : cityLocation
                         )
                         viewModel.addPlant(newPlant)
                         dismiss()
@@ -593,6 +601,7 @@ struct EditPlantView: View {
     @State private var nickname: String
     @State private var selectedSpecies: String
     @State private var selectedVibe: PlantVibe
+    @State private var cityLocation: String
     
     init(plant: Plant, viewModel: PlantViewModel) {
         self.plant = plant
@@ -600,6 +609,7 @@ struct EditPlantView: View {
         _nickname = State(initialValue: plant.nickname)
         _selectedSpecies = State(initialValue: plant.species)
         _selectedVibe = State(initialValue: plant.vibe)
+        _cityLocation = State(initialValue: plant.location ?? "")
     }
     
     var body: some View {
@@ -624,6 +634,15 @@ struct EditPlantView: View {
                         }
                     }
                 }
+                
+                Section("Location") {
+                    TextField("City (e.g., Edinburgh, Scotland)", text: $cityLocation)
+                        .autocapitalization(.words)
+                    
+                    Text("Enter your city for weather-aware plant messages")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
             }
             .navigationTitle("Edit Plant")
             .navigationBarTitleDisplayMode(.inline)
@@ -637,7 +656,8 @@ struct EditPlantView: View {
                             plant.id,
                             nickname: nickname.isEmpty ? selectedSpecies : nickname,
                             species: selectedSpecies,
-                            vibe: selectedVibe
+                            vibe: selectedVibe,
+                            location: cityLocation.isEmpty ? nil : cityLocation
                         )
                         dismiss()
                     }
