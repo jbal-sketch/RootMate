@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import UIKit
 
 struct SettingsView: View {
     @State private var notificationTime: Date
@@ -13,18 +14,22 @@ struct SettingsView: View {
     @ObservedObject var viewModel: PlantViewModel
     
     private let notificationTimeKey = "notificationTime"
+    private let userLocationKey = "userLocation"
     
     @State private var apiKey: String
+    @State private var userLocation: String
+    @State private var notificationStatus: String = "Checking..."
+    @State private var showingPermissionAlert = false
     
     init(viewModel: PlantViewModel) {
         self.viewModel = viewModel
-        // Load saved API key or set default (pre-populate if not set)
-        let savedApiKey = UserDefaults.standard.string(forKey: "gemini_api_key") ?? "AIzaSyBGaMbsDgg0kvsCGWBXuHF70ERjeyaQnww"
-        if UserDefaults.standard.string(forKey: "gemini_api_key") == nil {
-            // First time - save the default API key
-            UserDefaults.standard.set(savedApiKey, forKey: "gemini_api_key")
-        }
+        // Load saved API key from secure Keychain storage
+        let savedApiKey = APIConfiguration.shared.getAPIKey() ?? ""
         _apiKey = State(initialValue: savedApiKey)
+        
+        // Load saved user location
+        let savedLocation = UserDefaults.standard.string(forKey: "userLocation") ?? ""
+        _userLocation = State(initialValue: savedLocation)
         
         // Load saved notification time or default to 9:00 AM
         let savedTime: Date
@@ -56,6 +61,15 @@ struct SettingsView: View {
                         .foregroundColor(.secondary)
                 }
                 
+                Section(header: Text("Location")) {
+                    TextField("City (e.g., Edinburgh, Scotland)", text: $userLocation)
+                        .autocapitalization(.words)
+                    
+                    Text("Enter your city for weather-aware plant messages")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+                
                 Section(header: Text("Notifications")) {
                     DatePicker(
                         "Notification Time",
@@ -67,6 +81,59 @@ struct SettingsView: View {
                     Text("You'll receive plant care reminders at this time each day.")
                         .font(.caption)
                         .foregroundColor(.secondary)
+                    
+                    // Notification status
+                    HStack {
+                        Image(systemName: notificationStatus.contains("✅") ? "checkmark.circle.fill" : "exclamationmark.triangle.fill")
+                            .foregroundColor(notificationStatus.contains("✅") ? .green : .orange)
+                        Text(notificationStatus)
+                            .font(.caption)
+                    }
+                    .padding(.vertical, 4)
+                    
+                    // Test notification button
+                    Button(action: {
+                        Task {
+                            // Check permissions first
+                            let status = await NotificationService.shared.checkAuthorizationStatus()
+                            if status != .authorized {
+                                showingPermissionAlert = true
+                                await updateNotificationStatus()
+                            } else {
+                                // Send test notifications (this will also generate daily messages)
+                                await NotificationService.shared.sendTestNotificationsForAll(plants: viewModel.plants, viewModel: viewModel)
+                                // Note: Notifications may not appear if app is in foreground
+                                // Try putting app in background or lock screen to see them
+                            }
+                        }
+                    }) {
+                        HStack {
+                            Image(systemName: "bell.badge")
+                            Text("Test Notifications Now")
+                        }
+                        .font(.subheadline)
+                        .foregroundColor(.blue)
+                    }
+                    
+                    Text("💡 Tip: Put the app in background or lock your device to see notifications")
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
+                        .padding(.top, 4)
+                }
+                .onAppear {
+                    Task {
+                        await updateNotificationStatus()
+                    }
+                }
+                .alert("Notification Permissions Required", isPresented: $showingPermissionAlert) {
+                    Button("Open Settings") {
+                        if let url = URL(string: UIApplication.openSettingsURLString) {
+                            UIApplication.shared.open(url)
+                        }
+                    }
+                    Button("Cancel", role: .cancel) { }
+                } message: {
+                    Text("Please enable notifications in iOS Settings > RootMate > Notifications to receive plant reminders.")
                 }
             }
             .navigationTitle("Settings")
@@ -83,11 +150,29 @@ struct SettingsView: View {
     }
     
     private func saveNotificationTime() {
-        // Save API key
-        UserDefaults.standard.set(apiKey, forKey: "gemini_api_key")
+        // Save API key securely to Keychain
+        if !apiKey.isEmpty {
+            let success = APIConfiguration.shared.setAPIKey(apiKey)
+            if success {
+                print("✅ API key saved to Keychain")
+            } else {
+                print("❌ Failed to save API key to Keychain")
+            }
+        } else {
+            // If empty, remove the key
+            APIConfiguration.shared.removeAPIKey()
+            print("🗑️ API key removed from Keychain")
+        }
         
         // Reload API key in view model
         viewModel.reloadAPIKey()
+        
+        // Verify API key was loaded
+        if APIConfiguration.shared.hasAPIKey() {
+            print("✅ API key verified in view model")
+        } else {
+            print("⚠️ API key not found after reload")
+        }
         
         // Extract just the time components and save
         let calendar = Calendar.current
@@ -97,6 +182,35 @@ struct SettingsView: View {
         // Create a reference date (Jan 1, 2000) with the selected time
         let referenceDate = calendar.date(from: DateComponents(year: 2000, month: 1, day: 1, hour: hour, minute: minute)) ?? Date()
         UserDefaults.standard.set(referenceDate.timeIntervalSince1970, forKey: notificationTimeKey)
+        
+        // Save user location
+        UserDefaults.standard.set(userLocation, forKey: userLocationKey)
+        
+        // Schedule notifications for all plants at the new time
+        NotificationService.shared.scheduleNotifications(for: viewModel.plants, at: notificationTime, viewModel: viewModel)
+        
+        // Update status
+        Task {
+            await updateNotificationStatus()
+        }
+    }
+    
+    private func updateNotificationStatus() async {
+        let status = await NotificationService.shared.checkAuthorizationStatus()
+        switch status {
+        case .authorized:
+            notificationStatus = "✅ Notifications enabled"
+        case .denied:
+            notificationStatus = "❌ Notifications denied - Enable in Settings"
+        case .notDetermined:
+            notificationStatus = "⚠️ Permissions not requested yet"
+        case .provisional:
+            notificationStatus = "⚠️ Provisional - Limited notifications"
+        case .ephemeral:
+            notificationStatus = "⚠️ Ephemeral - Temporary access"
+        @unknown default:
+            notificationStatus = "❓ Unknown status"
+        }
     }
 }
 

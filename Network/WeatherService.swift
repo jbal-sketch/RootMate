@@ -18,8 +18,8 @@ struct WeatherData: Codable {
         let weatherCode: Int
         
         enum CodingKeys: String, CodingKey {
-            case temperature
-            case humidity
+            case temperature = "temperature_2m"
+            case humidity = "relative_humidity_2m"
             case precipitation
             case weatherCode = "weather_code"
         }

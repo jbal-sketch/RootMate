@@ -18,6 +18,9 @@
 		F12345678901234567890123456 /* MyRootmatesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67890123456789012345678901 /* MyRootmatesView.swift */; };
 		1234567890123456789012345678 /* AISystemPrompts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78901234567890123456789012 /* AISystemPrompts.swift */; };
 		2345678901234567890123456789 /* QRCodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3456789012345678901234567890 /* QRCodeView.swift */; };
+		C234567890123456789012345678 /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = D345678901234567890123456789 /* NotificationService.swift */; };
+		E234567890123456789012345678 /* APIConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = F345678901234567890123456789 /* APIConfiguration.swift */; };
+		H567890123456789012345678901 /* KeychainService.swift in Sources */ = {isa = PBXBuildFile; fileRef = G456789012345678901234567890 /* KeychainService.swift */; };
 		5678901234567890123456789012 /* QRCodeGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4567890123456789012345678901 /* QRCodeGenerator.swift */; };
 		8901234567890123456789012345 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9012345678901234567890123456 /* SettingsView.swift */; };
 		A123456789012345678901234567 /* PlantChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B23456789012345678901234567 /* PlantChatView.swift */; };
@@ -44,6 +47,9 @@
 		4567890123456789012345678901 /* QRCodeGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRCodeGenerator.swift; sourceTree = "<group>"; };
 		9012345678901234567890123456 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		B23456789012345678901234567 /* PlantChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlantChatView.swift; sourceTree = "<group>"; };
+		D345678901234567890123456789 /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
+		F345678901234567890123456789 /* APIConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIConfiguration.swift; sourceTree = "<group>"; };
+		G456789012345678901234567890 /* KeychainService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainService.swift; sourceTree = "<group>"; };
 		EF6B176BE8656606445CD881 /* RootMate.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = RootMate.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -142,6 +148,9 @@
 				075E31D4942F9BA051BEEAAA /* .gitkeep */,
 				78901234567890123456789012 /* AISystemPrompts.swift */,
 				4567890123456789012345678901 /* QRCodeGenerator.swift */,
+				D345678901234567890123456789 /* NotificationService.swift */,
+				F345678901234567890123456789 /* APIConfiguration.swift */,
+				G456789012345678901234567890 /* KeychainService.swift */,
 			);
 			path = Utilities;
 			sourceTree = "<group>";
@@ -221,6 +230,9 @@
 				F12345678901234567890123456 /* MyRootmatesView.swift in Sources */,
 				1234567890123456789012345678 /* AISystemPrompts.swift in Sources */,
 				2345678901234567890123456789 /* QRCodeView.swift in Sources */,
+				C234567890123456789012345678 /* NotificationService.swift in Sources */,
+				E234567890123456789012345678 /* APIConfiguration.swift in Sources */,
+				H567890123456789012345678901 /* KeychainService.swift in Sources */,
 				5678901234567890123456789012 /* QRCodeGenerator.swift in Sources */,
 				8901234567890123456789012345 /* SettingsView.swift in Sources */,
 				A123456789012345678901234567 /* PlantChatView.swift in Sources */,

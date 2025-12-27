@@ -55,15 +55,11 @@ class PlantViewModel: ObservableObject {
     }
     
     private func loadAPIKey() {
-        let defaults = UserDefaults.standard
-        if let apiKey = defaults.string(forKey: "gemini_api_key"), !apiKey.isEmpty {
+        // Use secure Keychain storage instead of UserDefaults
+        if let apiKey = APIConfiguration.shared.getAPIKey() {
             configureAI(apiKey: apiKey)
-        } else {
-            // If no API key exists, save the default one
-            let defaultApiKey = "AIzaSyBGaMbsDgg0kvsCGWBXuHF70ERjeyaQnww"
-            defaults.set(defaultApiKey, forKey: "gemini_api_key")
-            configureAI(apiKey: defaultApiKey)
         }
+        // No default key - user must configure their own API key
     }
     
     func reloadAPIKey() {
@@ -79,8 +75,7 @@ class PlantViewModel: ObservableObject {
                 vibe: .dramaQueen,
                 status: .thirsty,
                 lastWatered: Calendar.current.date(byAdding: .day, value: -3, to: Date()),
-                healthStreak: 5,
-                location: "Edinburgh, Scotland"
+                healthStreak: 5
             ),
             Plant(
                 userId: currentUserId,
@@ -89,8 +84,7 @@ class PlantViewModel: ObservableObject {
                 vibe: .chillRoomie,
                 status: .hydrated,
                 lastWatered: Calendar.current.date(byAdding: .day, value: -1, to: Date()),
-                healthStreak: 12,
-                location: "Edinburgh, Scotland"
+                healthStreak: 12
             ),
             Plant(
                 userId: currentUserId,
@@ -99,8 +93,7 @@ class PlantViewModel: ObservableObject {
                 vibe: .grumpySenior,
                 status: .hydrated,
                 lastWatered: Calendar.current.date(byAdding: .day, value: -5, to: Date()),
-                healthStreak: 30,
-                location: "Edinburgh, Scotland"
+                healthStreak: 30
             )
         ]
     }
@@ -113,6 +106,26 @@ class PlantViewModel: ObservableObject {
             plantWithQR.qrCode = plant.id.uuidString
         }
         plants.append(plantWithQR)
+        
+        // Schedule notification for new plant
+        scheduleNotificationsForAllPlants()
+    }
+    
+    // Schedule notifications for all plants
+    func scheduleNotificationsForAllPlants() {
+        if let savedTimeInterval = UserDefaults.standard.object(forKey: "notificationTime") as? TimeInterval {
+            let calendar = Calendar.current
+            let savedDate = Date(timeIntervalSince1970: savedTimeInterval)
+            let hour = calendar.component(.hour, from: savedDate)
+            let minute = calendar.component(.minute, from: savedDate)
+            let notificationTime = calendar.date(bySettingHour: hour, minute: minute, second: 0, of: Date()) ?? Date()
+            
+            NotificationService.shared.scheduleNotifications(for: plants, at: notificationTime, viewModel: self)
+        } else {
+            // Default to 9 AM
+            let defaultTime = Calendar.current.date(bySettingHour: 9, minute: 0, second: 0, of: Date()) ?? Date()
+            NotificationService.shared.scheduleNotifications(for: plants, at: defaultTime, viewModel: self)
+        }
     }
     
     func updatePlantStatus(_ plantId: UUID) {
@@ -151,12 +164,11 @@ class PlantViewModel: ObservableObject {
         }
     }
     
-    func updatePlant(_ plantId: UUID, nickname: String, species: String, vibe: PlantVibe, location: String? = nil) {
+    func updatePlant(_ plantId: UUID, nickname: String, species: String, vibe: PlantVibe) {
         if let index = plants.firstIndex(where: { $0.id == plantId }) {
             plants[index].nickname = nickname
             plants[index].species = species
             plants[index].vibe = vibe
-            plants[index].location = location
         }
     }
     
@@ -168,13 +180,18 @@ class PlantViewModel: ObservableObject {
             }
         }
         
+        // Try to reload API key if service is not configured
+        if aiService == nil {
+            reloadAPIKey()
+        }
+        
         guard let aiService = aiService else {
             throw NSError(domain: "PlantViewModel", code: 1, userInfo: [NSLocalizedDescriptionKey: "AI service not configured. Please set Gemini API key in settings."])
         }
         
-        // Get weather data if plant has a location set
+        // Get weather data if user has a location set in settings
         var weatherData: WeatherData? = nil
-        if let location = plant.location {
+        if let location = UserDefaults.standard.string(forKey: "userLocation"), !location.isEmpty {
             // Get coordinates for the location, then fetch weather
             do {
                 let coordinates = try await weatherService.getCoordinates(for: location)
@@ -229,6 +246,43 @@ class PlantViewModel: ObservableObject {
         
         return recentMessages.first { message in
             message.plantId == plantId && calendar.startOfDay(for: message.date) == today
+        }
+    }
+    
+    // Generate daily messages for all plants if it's past notification time
+    func generateDailyMessagesIfNeeded() async {
+        // Get notification time from UserDefaults
+        let calendar = Calendar.current
+        let now = Date()
+        
+        var notificationHour = 9 // Default 9 AM
+        var notificationMinute = 0
+        
+        if let savedTimeInterval = UserDefaults.standard.object(forKey: "notificationTime") as? TimeInterval {
+            let savedDate = Date(timeIntervalSince1970: savedTimeInterval)
+            notificationHour = calendar.component(.hour, from: savedDate)
+            notificationMinute = calendar.component(.minute, from: savedDate)
+        }
+        
+        // Check if it's past notification time today
+        guard let notificationTime = calendar.date(bySettingHour: notificationHour, minute: notificationMinute, second: 0, of: now) else {
+            return
+        }
+        
+        // Only generate if it's past the notification time
+        guard now >= notificationTime else {
+            return
+        }
+        
+        // Generate messages for all plants that don't have today's message
+        for plant in plants {
+            if !hasMessageForToday(for: plant.id) {
+                do {
+                    _ = try await generateDailyMessage(for: plant)
+                } catch {
+                    print("Failed to generate message for \(plant.nickname): \(error)")
+                }
+            }
         }
     }
 }

@@ -82,9 +82,19 @@ struct MyRootmatesView: View {
             }
             .onAppear {
                 viewModel.refreshAllStatuses()
-                // Configure AI if API key is available
-                if let apiKey = UserDefaults.standard.string(forKey: "gemini_api_key"), !apiKey.isEmpty {
-                    viewModel.configureAI(apiKey: apiKey)
+                // Configure AI if API key is available (loaded from secure Keychain)
+                viewModel.reloadAPIKey()
+                
+                // Store view model reference for notification handling
+                AppState.sharedViewModel = viewModel
+                
+                // Schedule notifications on app appear
+                scheduleNotificationsIfNeeded()
+                
+                // Generate daily messages if it's past notification time
+                let viewModelRef = viewModel
+                Task { @MainActor in
+                    await viewModelRef.generateDailyMessagesIfNeeded()
                 }
             }
             .onChange(of: appState.selectedPlantId) { newValue in
@@ -245,6 +255,24 @@ struct MyRootmatesView: View {
     private var hydratedCount: Int {
         viewModel.plants.filter { $0.status == .hydrated }.count
     }
+    
+    // Schedule notifications if time is set
+    private func scheduleNotificationsIfNeeded() {
+        if let savedTimeInterval = UserDefaults.standard.object(forKey: "notificationTime") as? TimeInterval {
+            let calendar = Calendar.current
+            let savedDate = Date(timeIntervalSince1970: savedTimeInterval)
+            let hour = calendar.component(.hour, from: savedDate)
+            let minute = calendar.component(.minute, from: savedDate)
+            let notificationTime = calendar.date(bySettingHour: hour, minute: minute, second: 0, of: Date()) ?? Date()
+            
+            NotificationService.shared.scheduleNotifications(for: viewModel.plants, at: notificationTime, viewModel: viewModel)
+        } else {
+            // Default to 9 AM
+            let defaultTime = Calendar.current.date(bySettingHour: 9, minute: 0, second: 0, of: Date()) ?? Date()
+            NotificationService.shared.scheduleNotifications(for: viewModel.plants, at: defaultTime, viewModel: viewModel)
+        }
+    }
+    
 }
 
 // MARK: - Rootmate Card
@@ -304,22 +332,46 @@ struct RootmateCard: View {
             }
             .buttonStyle(PlainButtonStyle())
             
-            // Quick Chat Button (Prominent!)
-            Button(action: {
-                showingChat = true
-            }) {
-                HStack {
-                    Image(systemName: viewModel.hasMessageForToday(for: plant.id) ? "bubble.left.fill" : "sparkles")
-                    Text(viewModel.hasMessageForToday(for: plant.id) ? "View Today's Message" : "Get Today's Message")
-                        .fontWeight(.semibold)
+            // Action Buttons
+            HStack(spacing: 12) {
+                // Water Button (only show when plant needs water)
+                if plant.status == .thirsty || plant.status == .critical {
+                    Button(action: {
+                        viewModel.waterPlant(plant.id)
+                    }) {
+                        HStack {
+                            Image(systemName: "drop.fill")
+                            Text("Water")
+                        }
+                        .font(.system(.subheadline, design: .default).weight(.semibold))
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 12)
+                        .background(Color.blue)
+                        .cornerRadius(12)
+                    }
                 }
-                .font(.subheadline)
-                .foregroundColor(.white)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 12)
-                .background(viewModel.hasMessageForToday(for: plant.id) ? Color(hex: "1B4332").opacity(0.8) : Color(hex: "1B4332"))
+                
+                // Chat Button
+                Button(action: {
+                    showingChat = true
+                }) {
+                    HStack {
+                        Image(systemName: viewModel.hasMessageForToday(for: plant.id) ? "bubble.left.fill" : "sparkles")
+                        Text(viewModel.hasMessageForToday(for: plant.id) ? "View Message" : "Get Message")
+                    }
+                    .font(.system(.subheadline, design: .default).weight(.semibold))
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 12)
+                    .background(viewModel.hasMessageForToday(for: plant.id) ? Color(hex: "1B4332").opacity(0.8) : Color(hex: "1B4332"))
+                    .cornerRadius(12)
+                }
             }
+            .padding(.horizontal, 16)
+            .padding(.bottom, 16)
         }
+        .background(Color.white.opacity(0.9))
         .cornerRadius(16)
         .shadow(color: .black.opacity(0.1), radius: 8, x: 0, y: 2)
         .sheet(isPresented: $showingDetails) {
@@ -714,7 +766,6 @@ struct AddPlantView: View {
     @State private var nickname = ""
     @State private var selectedSpecies = "Fiddle Leaf Fig"
     @State private var selectedVibe: PlantVibe = .dramaQueen
-    @State private var cityLocation = ""
     
     var body: some View {
         NavigationView {
@@ -762,15 +813,6 @@ struct AddPlantView: View {
                             .font(.caption)
                     }
                 }
-                
-                Section("Location") {
-                    TextField("City (e.g., Edinburgh, Scotland)", text: $cityLocation)
-                        .autocapitalization(.words)
-                    
-                    Text("Enter your city for weather-aware plant messages")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                }
             }
             .navigationTitle("Add Plant")
             .navigationBarTitleDisplayMode(.inline)
@@ -787,8 +829,7 @@ struct AddPlantView: View {
                             nickname: nickname.isEmpty ? selectedSpecies : nickname,
                             species: selectedSpecies,
                             vibe: selectedVibe,
-                            qrCode: plantId.uuidString, // Generate QR code identifier
-                            location: cityLocation.isEmpty ? nil : cityLocation
+                            qrCode: plantId.uuidString // Generate QR code identifier
                         )
                         viewModel.addPlant(newPlant)
                         dismiss()
@@ -808,7 +849,6 @@ struct EditPlantView: View {
     @State private var nickname: String
     @State private var selectedSpecies: String
     @State private var selectedVibe: PlantVibe
-    @State private var cityLocation: String
     
     init(plant: Plant, viewModel: PlantViewModel) {
         self.plant = plant
@@ -816,7 +856,6 @@ struct EditPlantView: View {
         _nickname = State(initialValue: plant.nickname)
         _selectedSpecies = State(initialValue: plant.species)
         _selectedVibe = State(initialValue: plant.vibe)
-        _cityLocation = State(initialValue: plant.location ?? "")
     }
     
     var body: some View {
@@ -824,55 +863,69 @@ struct EditPlantView: View {
             Form {
                 Section("Plant Details") {
                     TextField("Nickname", text: $nickname)
-                    HStack {
+                    VStack(alignment: .leading, spacing: 8) {
                         Text("Species")
-                        Spacer()
-                        Picker("", selection: $selectedSpecies) {
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                        
+                        Menu {
                             ForEach(PlantSpecies.commonSpecies, id: \.self) { species in
-                                HStack {
-                                    Text(PlantSpecies.emoji(for: species))
-                                    Text(species)
+                                Button(action: {
+                                    selectedSpecies = species
+                                }) {
+                                    HStack {
+                                        Text(PlantSpecies.emoji(for: species))
+                                        Text(species)
+                                    }
                                 }
-                                .tag(species)
+                            }
+                        } label: {
+                            HStack {
+                                Text(PlantSpecies.emoji(for: selectedSpecies))
+                                Text(selectedSpecies)
+                                Spacer()
+                                Image(systemName: "chevron.down")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
                             }
                         }
-                        .pickerStyle(.menu)
-                        .labelsHidden()
-                    }
-                    HStack {
+                        
                         Text("Selected: \(PlantSpecies.emoji(for: selectedSpecies)) \(selectedSpecies)")
-                            .foregroundColor(.secondary)
                             .font(.caption)
+                            .foregroundColor(.secondary)
                     }
-                    HStack {
+                    
+                    VStack(alignment: .leading, spacing: 8) {
                         Text("Vibe")
-                        Spacer()
-                        Picker("", selection: $selectedVibe) {
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                        
+                        Menu {
                             ForEach(PlantVibe.allCases, id: \.self) { vibe in
-                                HStack {
-                                    Text(vibe.emoji)
-                                    Text(vibe.rawValue)
+                                Button(action: {
+                                    selectedVibe = vibe
+                                }) {
+                                    HStack {
+                                        Text(vibe.emoji)
+                                        Text(vibe.rawValue)
+                                    }
                                 }
-                                .tag(vibe)
+                            }
+                        } label: {
+                            HStack {
+                                Text(selectedVibe.emoji)
+                                Text(selectedVibe.rawValue)
+                                Spacer()
+                                Image(systemName: "chevron.down")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
                             }
                         }
-                        .pickerStyle(.menu)
-                        .labelsHidden()
-                    }
-                    HStack {
+                        
                         Text("Selected: \(selectedVibe.emoji) \(selectedVibe.rawValue)")
-                            .foregroundColor(.secondary)
                             .font(.caption)
+                            .foregroundColor(.secondary)
                     }
-                }
-                
-                Section("Location") {
-                    TextField("City (e.g., Edinburgh, Scotland)", text: $cityLocation)
-                        .autocapitalization(.words)
-                    
-                    Text("Enter your city for weather-aware plant messages")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
                 }
             }
             .navigationTitle("Edit Plant")
@@ -887,8 +940,7 @@ struct EditPlantView: View {
                             plant.id,
                             nickname: nickname.isEmpty ? selectedSpecies : nickname,
                             species: selectedSpecies,
-                            vibe: selectedVibe,
-                            location: cityLocation.isEmpty ? nil : cityLocation
+                            vibe: selectedVibe
                         )
                         dismiss()
                     }

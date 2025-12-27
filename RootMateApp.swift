@@ -6,6 +6,8 @@
 //
 
 import SwiftUI
+import UserNotifications
+import UIKit
 
 @main
 struct RootMateApp: App {
@@ -17,6 +19,34 @@ struct RootMateApp: App {
                 .environmentObject(appState)
                 .onOpenURL { url in
                     handleDeepLink(url: url)
+                }
+                .onAppear {
+                    // Request notification permissions on app launch
+                    Task {
+                        let granted = await NotificationService.shared.requestAuthorization()
+                        if granted {
+                            print("✅ Notification permissions granted")
+                        } else {
+                            print("❌ Notification permissions denied")
+                        }
+                    }
+                }
+                .onReceive(NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)) { _ in
+                    // When app enters foreground, check if we need to generate messages
+                    // This handles the case where notifications fired while app was in background
+                    Task {
+                        if let viewModel = AppState.sharedViewModel {
+                            await viewModel.generateDailyMessagesIfNeeded()
+                        }
+                    }
+                }
+                .onReceive(NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)) { _ in
+                    // Also check when app becomes active
+                    Task {
+                        if let viewModel = AppState.sharedViewModel {
+                            await viewModel.generateDailyMessagesIfNeeded()
+                        }
+                    }
                 }
         }
     }
@@ -42,5 +72,9 @@ struct RootMateApp: App {
 // App state for handling deep links
 class AppState: ObservableObject {
     @Published var selectedPlantId: UUID?
+    
+    // Shared view model instance for notification handling
+    static var sharedViewModel: PlantViewModel?
 }
+
 
