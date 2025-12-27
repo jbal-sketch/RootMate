@@ -65,6 +65,36 @@ open RootMate.xcodeproj
    - Ensure your target is selected
 5. Build and run!
 
+## QR Code Feature
+
+RootMate includes branded QR code stickers that link physical plants to their digital profiles in the app.
+
+### How It Works
+
+1. **Generate QR Code**: Users can generate a branded QR code sticker for each plant from the plant detail view
+2. **Print & Apply**: The QR code can be printed on sticker paper and applied to plant pots
+3. **Scan**: When someone scans the QR code:
+   - **If RootMate app is installed**: Opens directly to the plant's detail view
+   - **If app is not installed**: Shows a download prompt with App Store link
+
+### Technical Details
+
+- **QR Code Format**: `https://rootmate.app/plant/{plantId}`
+- **Deep Link Scheme**: `rootmate://plant/{plantId}` (handled by the app)
+- **Web Fallback**: `/marketing/pages/plant.html` handles redirects and download prompts
+- **Configuration**: Update the domain in `QRCodeGenerator.swift` (currently set to `rootmate.app`)
+
+### Setup
+
+1. **Update Domain**: Before deploying, update the base URL in `Utilities/QRCodeGenerator.swift`:
+   ```swift
+   let baseURL = "https://yourdomain.com" // Update this
+   ```
+
+2. **Deploy Marketing Site**: The marketing site includes the plant redirect page and should be deployed to your domain
+
+3. **URL Rewrites**: The `vercel.json` file includes a rewrite rule for `/plant/:plantId` → `/pages/plant.html?id=:plantId`
+
 ## Notes
 
 - The app uses SwiftUI for the user interface

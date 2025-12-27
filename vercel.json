@@ -1,6 +1,12 @@
 {
   "buildCommand": null,
   "outputDirectory": "marketing",
-  "framework": null
+  "framework": null,
+  "rewrites": [
+    {
+      "source": "/plant/:plantId",
+      "destination": "/pages/plant.html?id=:plantId"
+    }
+  ]
 }
 

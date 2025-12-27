@@ -514,6 +514,7 @@ struct PlantDetailView: View {
     @State private var showingEditPlant = false
     @State private var showingChat = false
     @State private var showingQRCode = false
+    @State private var showingPhotoComingSoon = false
     
     private var plant: Plant? {
         viewModel.plants.first(where: { $0.id == plantId })
@@ -600,18 +601,9 @@ struct PlantDetailView: View {
             }
             .sheet(isPresented: $showingQRCode) {
                 if let plant = plant {
-                    NavigationView {
-                        QRCodeView(plant: plant)
-                            .navigationTitle("Plant QR Code")
-                            .navigationBarTitleDisplayMode(.inline)
-                            .toolbar {
-                                ToolbarItem(placement: .navigationBarTrailing) {
-                                    Button("Done") {
-                                        showingQRCode = false
-                                    }
-                                }
-                            }
-                    }
+                    QRCodeView(plant: plant, onDismiss: {
+                        showingQRCode = false
+                    })
                 }
             }
             .sheet(isPresented: $showingChat) {
@@ -619,6 +611,24 @@ struct PlantDetailView: View {
                     PlantChatView(plant: plant, viewModel: viewModel)
                 }
             }
+            .sheet(isPresented: $showingPhotoComingSoon) {
+                PhotoComingSoonView()
+            }
+        }
+    }
+    
+    // Log photo button usage
+    private func logPhotoButtonUsage() {
+        let timestamp = Date()
+        let count = UserDefaults.standard.integer(forKey: "photoButtonOpenCount")
+        let newCount = count + 1
+        UserDefaults.standard.set(newCount, forKey: "photoButtonOpenCount")
+        
+        print("📸 Photo button opened - Count: \(newCount), Timestamp: \(timestamp)")
+        
+        // Also log to console with plant info if available
+        if let plant = plant {
+            print("   Plant: \(plant.nickname) (\(plant.species))")
         }
     }
     
@@ -693,7 +703,9 @@ struct PlantDetailView: View {
             }
             
             Button(action: {
-                // TODO: Open camera for photo upload
+                // Log photo button usage
+                logPhotoButtonUsage()
+                showingPhotoComingSoon = true
             }) {
                 HStack {
                     Image(systemName: "camera.fill")
@@ -945,6 +957,58 @@ struct EditPlantView: View {
                         dismiss()
                     }
                     .disabled(nickname.isEmpty)
+                }
+            }
+        }
+    }
+}
+
+// MARK: - Photo Coming Soon View
+struct PhotoComingSoonView: View {
+    @Environment(\.dismiss) var dismiss
+    
+    var body: some View {
+        NavigationView {
+            VStack(spacing: 24) {
+                Spacer()
+                
+                Image(systemName: "camera.fill")
+                    .font(.system(size: 80))
+                    .foregroundColor(Color(hex: "1B4332"))
+                    .padding()
+                
+                Text("Photo Feature")
+                    .font(.largeTitle)
+                    .fontWeight(.bold)
+                    .foregroundColor(Color(hex: "1B4332"))
+                
+                Text("Coming Soon!")
+                    .font(.title2)
+                    .foregroundColor(.secondary)
+                
+                Text("We're working on adding photo functionality so you can document your plant's growth journey. Stay tuned!")
+                    .font(.body)
+                    .multilineTextAlignment(.center)
+                    .foregroundColor(.secondary)
+                    .padding(.horizontal, 40)
+                
+                Spacer()
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(
+                LinearGradient(
+                    colors: [Color(hex: "FDFBF7"), Color(hex: "E8F5E9")],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+            )
+            .navigationTitle("Photo Feature")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Done") {
+                        dismiss()
+                    }
                 }
             }
         }

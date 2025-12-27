@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="View your plant on RootMate - Download the app to connect with your plant">
+    <title>View Plant | RootMate</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --forest-green: #1B4332;
+            --terracotta: #D97706;
+            --cream: #FDFBF7;
+            --light-green: #E8F5E9;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .loading {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-b from-[#FDFBF7] to-[#E8F5E9] min-h-screen">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex-shrink-0">
+                    <a href="../index.html"><img src="../images/rootmate-logo.png" alt="RootMate Logo" class="h-10"></a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="max-w-2xl mx-auto px-4 py-12">
+        <!-- Loading State -->
+        <div id="loading" class="text-center">
+            <div class="mb-6">
+                <div class="inline-block text-6xl loading">🪴</div>
+            </div>
+            <h1 class="text-3xl font-bold text-[#1B4332] mb-4">Opening RootMate...</h1>
+            <p class="text-gray-600">If the app doesn't open, you'll be redirected to download it.</p>
+        </div>
+
+        <!-- Download Prompt (hidden initially) -->
+        <div id="download-prompt" class="hidden text-center">
+            <div class="bg-white rounded-2xl shadow-xl p-8 mb-8">
+                <div class="mb-6">
+                    <div class="text-8xl mb-4">🪴</div>
+                    <h1 class="text-4xl font-bold text-[#1B4332] mb-4">View Your Plant on RootMate</h1>
+                    <p class="text-lg text-gray-600 mb-2">This QR code is linked to a plant in the RootMate app.</p>
+                    <p class="text-lg text-gray-600">Download the app to view your plant's details, chat with it, and track its care!</p>
+                </div>
+
+                <!-- App Store Badges -->
+                <div class="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8">
+                    <!-- TODO: Update App Store link when app is published -->
+                    <a href="https://apps.apple.com/app/rootmate" id="app-store-link" 
+                       class="inline-block transition-transform hover:scale-105"
+                       target="_blank" rel="noopener noreferrer">
+                        <img src="https://tools.applemediaservices.com/api/badges/download-on-the-app-store/black/en-us?size=250x83&releaseDate=1704067200" 
+                             alt="Download on the App Store" 
+                             class="h-14 w-auto">
+                    </a>
+                </div>
+
+                <!-- Features -->
+                <div class="grid md:grid-cols-2 gap-6 mt-8 text-left">
+                    <div class="flex items-start gap-3">
+                        <div class="text-2xl">💬</div>
+                        <div>
+                            <h3 class="font-semibold text-[#1B4332] mb-1">Daily Plant Chat</h3>
+                            <p class="text-sm text-gray-600">Get personalized messages from your plant based on its personality</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-3">
+                        <div class="text-2xl">🌡️</div>
+                        <div>
+                            <h3 class="font-semibold text-[#1B4332] mb-1">Weather-Aware Care</h3>
+                            <p class="text-sm text-gray-600">Smart reminders that adapt to your local weather conditions</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-3">
+                        <div class="text-2xl">📊</div>
+                        <div>
+                            <h3 class="font-semibold text-[#1B4332] mb-1">Health Tracking</h3>
+                            <p class="text-sm text-gray-600">Track your plant's health streak and care history</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-3">
+                        <div class="text-2xl">🏷️</div>
+                        <div>
+                            <h3 class="font-semibold text-[#1B4332] mb-1">QR Code Stickers</h3>
+                            <p class="text-sm text-gray-600">Print QR codes to easily access your plant's info</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Alternative Actions -->
+            <div class="bg-white rounded-2xl shadow-lg p-6">
+                <p class="text-gray-600 mb-4">Already have the app?</p>
+                <button onclick="tryOpenApp()" 
+                        class="bg-[#1B4332] text-white px-6 py-3 rounded-lg font-semibold hover:bg-[#2d5a42] transition-colors">
+                    Open in RootMate App
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Get plant ID from URL
+        // Expected format: /pages/plant.html?id={uuid} or /plant/{uuid}
+        function getPlantId() {
+            // First try query parameter
+            const urlParams = new URLSearchParams(window.location.search);
+            const idFromQuery = urlParams.get('id');
+            if (idFromQuery) {
+                return idFromQuery;
+            }
+            
+            // Try to get from path: /plant/{uuid}
+            const pathParts = window.location.pathname.split('/').filter(p => p);
+            const plantIndex = pathParts.indexOf('plant');
+            if (plantIndex !== -1 && pathParts[plantIndex + 1]) {
+                const plantId = pathParts[plantIndex + 1];
+                // Validate it looks like a UUID
+                const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+                if (uuidRegex.test(plantId)) {
+                    return plantId;
+                }
+            }
+            
+            return null;
+        }
+
+        const plantId = getPlantId();
+        const appScheme = plantId ? `rootmate://plant/${plantId}` : 'rootmate://';
+
+        function tryOpenApp() {
+            // Try to open the app
+            window.location.href = appScheme;
+            
+            // Show download prompt after a short delay if app doesn't open
+            setTimeout(() => {
+                showDownloadPrompt();
+            }, 500);
+        }
+
+        function showDownloadPrompt() {
+            document.getElementById('loading').classList.add('hidden');
+            document.getElementById('download-prompt').classList.remove('hidden');
+        }
+
+        // Auto-try to open app on page load
+        if (plantId) {
+            // Try to open the app immediately
+            tryOpenApp();
+            
+            // If app doesn't open within 2 seconds, show download prompt
+            setTimeout(() => {
+                showDownloadPrompt();
+            }, 2000);
+        } else {
+            // No plant ID, show download prompt immediately
+            showDownloadPrompt();
+        }
+
+        // Handle visibility change (user might have switched to app)
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                // User might have switched to the app
+                // Don't show download prompt if they come back
+                setTimeout(() => {
+                    if (!document.hidden) {
+                        // They came back, might want to download
+                    }
+                }, 1000);
+            }
+        });
+    </script>
+</body>
+</html>
+
