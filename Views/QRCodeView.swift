@@ -50,6 +50,7 @@ struct QRCodeView: View {
 
 #Preview {
     QRCodeView(plant: Plant(
+        userId: UUID(),
         nickname: "Fiona",
         species: "Fiddle Leaf Fig",
         vibe: .dramaQueen

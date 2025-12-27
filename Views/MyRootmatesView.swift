@@ -9,8 +9,10 @@ import SwiftUI
 
 struct MyRootmatesView: View {
     @StateObject private var viewModel = PlantViewModel()
+    @EnvironmentObject var appState: AppState
     @State private var showingAddPlant = false
     @State private var showingSettings = false
+    @State private var selectedPlantId: UUID?
     
     var body: some View {
         NavigationView {
@@ -66,8 +68,29 @@ struct MyRootmatesView: View {
             .sheet(isPresented: $showingSettings) {
                 SettingsView()
             }
+            .sheet(isPresented: Binding(
+                get: { selectedPlantId != nil },
+                set: { if !$0 { selectedPlantId = nil } }
+            )) {
+                if let plantId = selectedPlantId {
+                    PlantDetailView(plantId: plantId, viewModel: viewModel)
+                }
+            }
             .onAppear {
                 viewModel.refreshAllStatuses()
+                // Configure AI if API key is available
+                if let apiKey = UserDefaults.standard.string(forKey: "gemini_api_key"), !apiKey.isEmpty {
+                    viewModel.configureAI(apiKey: apiKey)
+                } else {
+                    // TEMPORARY: Quick test API key - REMOVE BEFORE COMMITTING
+                    viewModel.configureAI(apiKey: "AIzaSyBGaMbsDgg0kvsCGWBXuHF70ERjeyaQnww")
+                }
+            }
+            .onChange(of: appState.selectedPlantId) { newPlantId in
+                if let plantId = newPlantId {
+                    selectedPlantId = plantId
+                    appState.selectedPlantId = nil // Reset after handling
+                }
             }
         }
     }
@@ -257,6 +280,8 @@ struct PlantDetailView: View {
     @ObservedObject var viewModel: PlantViewModel
     @Environment(\.dismiss) var dismiss
     @State private var showingEditPlant = false
+    @State private var showingChat = false
+    @State private var showingQRCode = false
     
     private var plant: Plant? {
         viewModel.plants.first(where: { $0.id == plantId })
@@ -299,11 +324,11 @@ struct PlantDetailView: View {
                         // Status Info
                         statusSection(plant: plant)
                         
-                        // QR Code
-                        QRCodeView(plant: plant)
-                        
                         // Actions
-                        actionButtons(plant: plant)
+                        actionButtons(plant: plant, showingQRCode: $showingQRCode)
+                        
+                        // Daily Chat Section
+                        dailyChatSection(plant: plant)
                     }
                     .padding()
                 }
@@ -334,6 +359,32 @@ struct PlantDetailView: View {
             .sheet(isPresented: $showingEditPlant) {
                 if let plant = plant {
                     EditPlantView(plant: plant, viewModel: viewModel)
+                }
+            }
+            .sheet(isPresented: $showingChat) {
+                if let plant = plant {
+                    PlantChatView(plant: plant, viewModel: viewModel)
+                }
+            }
+            .sheet(isPresented: $showingQRCode) {
+                if let plant = plant {
+                    NavigationView {
+                        QRCodeView(plant: plant)
+                            .navigationTitle("Plant QR Code")
+                            .navigationBarTitleDisplayMode(.inline)
+                            .toolbar {
+                                ToolbarItem(placement: .navigationBarTrailing) {
+                                    Button("Done") {
+                                        showingQRCode = false
+                                    }
+                                }
+                            }
+                    }
+                }
+            }
+            .sheet(isPresented: $showingChat) {
+                if let plant = plant {
+                    PlantChatView(plant: plant, viewModel: viewModel)
                 }
             }
         }
@@ -391,7 +442,7 @@ struct PlantDetailView: View {
         }
     }
     
-    private func actionButtons(plant: Plant) -> some View {
+    private func actionButtons(plant: Plant, showingQRCode: Binding<Bool>) -> some View {
         VStack(spacing: 12) {
             Button(action: {
                 viewModel.waterPlant(plant.id)
@@ -426,6 +477,52 @@ struct PlantDetailView: View {
                         .stroke(Color(hex: "1B4332"), lineWidth: 2)
                 )
             }
+            
+            Button(action: {
+                showingQRCode.wrappedValue = true
+            }) {
+                HStack {
+                    Image(systemName: "qrcode")
+                    Text("View QR Code")
+                }
+                .font(.headline)
+                .foregroundColor(Color(hex: "1B4332"))
+                .frame(maxWidth: .infinity)
+                .padding()
+                .background(Color.white)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(Color(hex: "1B4332"), lineWidth: 2)
+                )
+            }
+        }
+    }
+    
+    private func dailyChatSection(plant: Plant) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Daily Chat")
+                .font(.headline)
+                .foregroundColor(Color(hex: "1B4332"))
+            
+            Button(action: {
+                showingChat = true
+            }) {
+                HStack {
+                    Image(systemName: "bubble.left.fill")
+                        .foregroundColor(Color(hex: "1B4332"))
+                    Text("Chat with \(plant.nickname)")
+                        .fontWeight(.medium)
+                    Spacer()
+                    Image(systemName: "chevron.right")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+                .foregroundColor(Color(hex: "1B4332"))
+                .padding()
+                .background(Color.white.opacity(0.8))
+                .cornerRadius(12)
+            }
+            .buttonStyle(PlainButtonStyle())
         }
     }
 }

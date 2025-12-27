@@ -37,7 +37,7 @@
 
    **Views folder:**
    - Right-click "Views" → "Add Files to RootMate..."
-   - Select `Views/MyRoommatesView.swift`
+   - Select `Views/MyRootmatesView.swift`
    - ✅ Check "Add to targets: RootMate"
    - Click "Add"
 
@@ -68,8 +68,8 @@
 ## 🎯 What You Should See
 
 The app will display:
-- **"My Roommates"** title at the top
-- **Header stats**: Total Roommates (3) and Hydrated count
+- **"My Rootmates"** title at the top
+- **Header stats**: Total Rootmates (3) and Hydrated count
 - **Three plant cards:**
   - 🌿 **Fiona** (Fiddle Leaf Fig, Drama Queen 💅) - Thirsty
   - 🌿 **Basil** (Basil, Chill Roomie 🌿) - Hydrated  
@@ -92,7 +92,7 @@ The app will display:
 → Make sure `PlantViewModel.swift` is added to the target
 
 **Error: "Value of type 'Color' has no member 'hex'"**
-→ This is normal - the Color extension is in MyRoommatesView.swift, make sure that file is added
+→ This is normal - the Color extension is in MyRootmatesView.swift, make sure that file is added
 
 **To check if files are added:**
 1. Click on the RootMate project (blue icon) in Project Navigator

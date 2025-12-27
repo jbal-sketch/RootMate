@@ -20,7 +20,7 @@ The following new files need to be added to your Xcode project:
    - `AIService.swift`
 
 4. **Views/**
-   - `MyRoommatesView.swift`
+   - `MyRootmatesView.swift`
 
 5. **Utilities/**
    - `AISystemPrompts.swift`
@@ -48,7 +48,7 @@ The following new files need to be added to your Xcode project:
 ### Step 3: Run the App
 
 1. Press `⌘ + R` (or Product → Run) to launch the app in the simulator
-2. The app should open showing the "My Roommates" dashboard
+2. The app should open showing the "My Rootmates" dashboard
 
 ### Step 4: Test Features
 
@@ -100,7 +100,7 @@ This will automatically include all Swift files based on `project.yml`.
 
 The app should display:
 - A beautiful gradient background (Cream to light green)
-- Header showing "Total Roommates" and "Hydrated" counts
+- Header showing "Total Rootmates" and "Hydrated" counts
 - Three plant cards:
   - **Fiona** (Fiddle Leaf Fig, Drama Queen 💅) - Thirsty
   - **Basil** (Basil, Chill Roomie 🌿) - Hydrated

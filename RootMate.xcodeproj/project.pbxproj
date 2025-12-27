@@ -15,7 +15,7 @@
 		C1D2E3F4567890123456789012 /* PlantViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E5F6789012345678901234 /* PlantViewModel.swift */; };
 		D1E2F3456789012345678901234 /* WeatherService.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5F6789012345678901234567 /* WeatherService.swift */; };
 		E1F2345678901234567890123456 /* AIService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6789012345678901234567890 /* AIService.swift */; };
-		F12345678901234567890123456 /* MyRoommatesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67890123456789012345678901 /* MyRoommatesView.swift */; };
+		F12345678901234567890123456 /* MyRootmatesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67890123456789012345678901 /* MyRootmatesView.swift */; };
 		1234567890123456789012345678 /* AISystemPrompts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78901234567890123456789012 /* AISystemPrompts.swift */; };
 		2345678901234567890123456789 /* QRCodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3456789012345678901234567890 /* QRCodeView.swift */; };
 		5678901234567890123456789012 /* QRCodeGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4567890123456789012345678901 /* QRCodeGenerator.swift */; };
@@ -36,7 +36,7 @@
 		D4E5F6789012345678901234 /* PlantViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlantViewModel.swift; sourceTree = "<group>"; };
 		E5F6789012345678901234567 /* WeatherService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherService.swift; sourceTree = "<group>"; };
 		F6789012345678901234567890 /* AIService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIService.swift; sourceTree = "<group>"; };
-		67890123456789012345678901 /* MyRoommatesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyRoommatesView.swift; sourceTree = "<group>"; };
+		67890123456789012345678901 /* MyRootmatesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyRootmatesView.swift; sourceTree = "<group>"; };
 		78901234567890123456789012 /* AISystemPrompts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AISystemPrompts.swift; sourceTree = "<group>"; };
 		3456789012345678901234567890 /* QRCodeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRCodeView.swift; sourceTree = "<group>"; };
 		4567890123456789012345678901 /* QRCodeGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRCodeGenerator.swift; sourceTree = "<group>"; };
@@ -124,7 +124,7 @@
 			isa = PBXGroup;
 			children = (
 				BDD55B34A12702B9E4C65A65 /* ContentView.swift */,
-				67890123456789012345678901 /* MyRoommatesView.swift */,
+				67890123456789012345678901 /* MyRootmatesView.swift */,
 				3456789012345678901234567890 /* QRCodeView.swift */,
 			);
 			path = Views;
@@ -212,7 +212,7 @@
 				C1D2E3F4567890123456789012 /* PlantViewModel.swift in Sources */,
 				D1E2F3456789012345678901234 /* WeatherService.swift in Sources */,
 				E1F2345678901234567890123456 /* AIService.swift in Sources */,
-				F12345678901234567890123456 /* MyRoommatesView.swift in Sources */,
+				F12345678901234567890123456 /* MyRootmatesView.swift in Sources */,
 				1234567890123456789012345678 /* AISystemPrompts.swift in Sources */,
 				2345678901234567890123456789 /* QRCodeView.swift in Sources */,
 				5678901234567890123456789012 /* QRCodeGenerator.swift in Sources */,

@@ -110,5 +110,42 @@ class PlantViewModel: ObservableObject {
             updatePlantStatus(plant.id)
         }
     }
+    
+    func updatePlant(_ plantId: UUID, nickname: String, species: String, vibe: PlantVibe) {
+        if let index = plants.firstIndex(where: { $0.id == plantId }) {
+            plants[index].nickname = nickname
+            plants[index].species = species
+            plants[index].vibe = vibe
+        }
+    }
+    
+    func generateDailyMessage(for plant: Plant) async throws -> String {
+        guard let aiService = aiService else {
+            throw NSError(domain: "PlantViewModel", code: 1, userInfo: [NSLocalizedDescriptionKey: "AI service not configured. Please set OpenAI API key in settings."])
+        }
+        
+        // Get weather data if location is available
+        var weatherData: WeatherData? = nil
+        if let location = plant.location {
+            // For testing, we'll use Edinburgh coordinates
+            // In production, you'd geocode the location string
+            do {
+                weatherData = try await weatherService.getWeather(latitude: 55.9533, longitude: -3.1883)
+            } catch {
+                // Continue without weather data if fetch fails
+                print("Failed to fetch weather: \(error)")
+            }
+        }
+        
+        // Get system prompt for the plant's vibe
+        let systemPrompt = AISystemPrompts.getPrompt(for: plant.species, vibe: plant.vibe)
+        
+        // Generate the message
+        return try await aiService.generatePlantMessage(
+            plant: plant,
+            weatherData: weatherData,
+            systemPrompt: systemPrompt
+        )
+    }
 }
 

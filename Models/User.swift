@@ -42,6 +42,7 @@ struct User: Identifiable, Codable {
     var location: String // For weather API
     var subscriptionTier: SubscriptionTier
     var plants: [Plant]
+    var notificationTime: Date // Time of day for notifications
     
     init(
         id: UUID = UUID(),
@@ -49,7 +50,8 @@ struct User: Identifiable, Codable {
         email: String,
         location: String,
         subscriptionTier: SubscriptionTier = .sprout,
-        plants: [Plant] = []
+        plants: [Plant] = [],
+        notificationTime: Date = Calendar.current.date(bySettingHour: 9, minute: 0, second: 0, of: Date()) ?? Date()
     ) {
         self.id = id
         self.name = name
@@ -57,6 +59,7 @@ struct User: Identifiable, Codable {
         self.location = location
         self.subscriptionTier = subscriptionTier
         self.plants = plants
+        self.notificationTime = notificationTime
     }
 }
 
