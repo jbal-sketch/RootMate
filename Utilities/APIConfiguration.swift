@@ -28,13 +28,13 @@ class APIConfiguration {
     /// Get the stored API key
     /// - Returns: The API key if available, nil otherwise
     func getAPIKey() -> String? {
-        // First, try to get from Keychain
+        // Get from Keychain only - no hardcoded keys
         if let key = keychain.get(apiKeyKey), !key.isEmpty {
             return key
         }
         
-        // Default API key (Gemini 1.5 Pro)
-        return "AIzaSyD85YnWDsK0WY8LkmFq1z_5CSu_IGsiXKs"
+        // No default key - user must configure their own API key in Settings
+        return nil
     }
     
     /// Store an API key securely
