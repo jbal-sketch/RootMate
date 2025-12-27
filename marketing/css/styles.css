@@ -377,10 +377,13 @@ body {
 }
 
 .footer-bottom {
-    text-align: center;
     padding-top: 2rem;
     border-top: 1px solid #333;
     color: #888;
+}
+
+.footer-bottom p {
+    margin: 0;
 }
 
 /* Responsive Design */

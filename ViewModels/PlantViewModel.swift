@@ -41,6 +41,7 @@ class PlantViewModel: ObservableObject {
     
     private let weatherService = WeatherService()
     private var aiService: AIService?
+    @Published var subscriptionService = SubscriptionService.shared
     
     init(currentUserId: UUID = UUID()) {
         self.currentUserId = currentUserId
@@ -98,7 +99,22 @@ class PlantViewModel: ObservableObject {
         ]
     }
     
-    func addPlant(_ plant: Plant) {
+    func addPlant(_ plant: Plant) throws {
+        // Check subscription limit
+        let maxPlants = subscriptionService.maxPlants
+        
+        // If not subscribed, check if adding this plant would exceed the limit
+        if !subscriptionService.isSubscribed {
+            if plants.count >= maxPlants {
+                throw PlantError.subscriptionRequired
+            }
+        } else {
+            // Subscribed users can have up to maxPlants
+            if plants.count >= maxPlants {
+                throw PlantError.plantLimitReached(maxPlants: maxPlants)
+            }
+        }
+        
         // Generate QR code for the plant if it doesn't have one
         var plantWithQR = plant
         if plantWithQR.qrCode == nil {
@@ -109,6 +125,23 @@ class PlantViewModel: ObservableObject {
         
         // Schedule notification for new plant
         scheduleNotificationsForAllPlants()
+    }
+    
+    enum PlantError: LocalizedError {
+        case subscriptionRequired
+        case plantLimitReached(maxPlants: Int)
+        case subscriptionRequiredForDailyUpdates
+        
+        var errorDescription: String? {
+            switch self {
+            case .subscriptionRequired:
+                return "Subscribe to RootMate Premium to add more than \(SubscriptionService.shared.maxPlants) plants. Get daily updates for up to \(SubscriptionService.shared.maxPlants) plants with a 7-day free trial."
+            case .plantLimitReached(let maxPlants):
+                return "You've reached the limit of \(maxPlants) plants. Upgrade to add more plants."
+            case .subscriptionRequiredForDailyUpdates:
+                return "Subscribe to RootMate Premium to get daily AI-powered messages from your plants. Start your 7-day free trial today!"
+            }
+        }
     }
     
     // Schedule notifications for all plants
@@ -173,6 +206,12 @@ class PlantViewModel: ObservableObject {
     }
     
     func generateDailyMessage(for plant: Plant) async throws -> String {
+        // Check subscription status - daily updates require subscription
+        await subscriptionService.checkSubscriptionStatus()
+        guard subscriptionService.isSubscribed else {
+            throw PlantError.subscriptionRequiredForDailyUpdates
+        }
+        
         // Check if message already exists for today
         if hasMessageForToday(for: plant.id) {
             if let existingMessage = getTodaysMessage(for: plant.id) {

@@ -13,7 +13,10 @@ struct MyRootmatesView: View {
     @EnvironmentObject var appState: AppState
     @State private var showingAddPlant = false
     @State private var showingSettings = false
+    @State private var showingSubscription = false
     @State private var selectedPlantId: UUID?
+    @State private var showingSubscriptionAlert = false
+    @State private var subscriptionAlertMessage = ""
     
     var body: some View {
         NavigationView {
@@ -58,7 +61,20 @@ struct MyRootmatesView: View {
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(action: {
-                        showingAddPlant = true
+                        // Check subscription status before allowing add
+                        Task {
+                            await viewModel.subscriptionService.checkSubscriptionStatus()
+                        }
+                        
+                        // Check if user can add more plants
+                        let canAdd = viewModel.plants.count < viewModel.subscriptionService.maxPlants || viewModel.subscriptionService.isSubscribed
+                        
+                        if canAdd {
+                            showingAddPlant = true
+                        } else {
+                            subscriptionAlertMessage = "Subscribe to RootMate Premium to add more than \(viewModel.subscriptionService.maxPlants) plants. Get daily updates for up to \(viewModel.subscriptionService.maxPlants) plants with a 7-day free trial."
+                            showingSubscriptionAlert = true
+                        }
                     }) {
                         Image(systemName: "plus.circle.fill")
                             .font(.title2)
@@ -67,7 +83,26 @@ struct MyRootmatesView: View {
                 }
             }
             .sheet(isPresented: $showingAddPlant) {
-                AddPlantView(viewModel: viewModel)
+                AddPlantView(viewModel: viewModel, onPlantAdded: { plant in
+                    do {
+                        try viewModel.addPlant(plant)
+                    } catch {
+                        subscriptionAlertMessage = error.localizedDescription
+                        showingSubscriptionAlert = true
+                        showingAddPlant = false
+                    }
+                })
+            }
+            .sheet(isPresented: $showingSubscription) {
+                SubscriptionView()
+            }
+            .alert("Subscription Required", isPresented: $showingSubscriptionAlert) {
+                Button("Subscribe") {
+                    showingSubscription = true
+                }
+                Button("Cancel", role: .cancel) { }
+            } message: {
+                Text(subscriptionAlertMessage)
             }
             .sheet(isPresented: $showingSettings) {
                 SettingsView(viewModel: viewModel)
@@ -87,6 +122,11 @@ struct MyRootmatesView: View {
                 
                 // Store view model reference for notification handling
                 AppState.sharedViewModel = viewModel
+                
+                // Check subscription status
+                Task {
+                    await viewModel.subscriptionService.checkSubscriptionStatus()
+                }
                 
                 // Schedule notifications on app appear
                 scheduleNotificationsIfNeeded()
@@ -778,6 +818,7 @@ struct AddPlantView: View {
     @State private var nickname = ""
     @State private var selectedSpecies = "Fiddle Leaf Fig"
     @State private var selectedVibe: PlantVibe = .dramaQueen
+    var onPlantAdded: ((Plant) -> Void)?
     
     var body: some View {
         NavigationView {
@@ -843,8 +884,18 @@ struct AddPlantView: View {
                             vibe: selectedVibe,
                             qrCode: plantId.uuidString // Generate QR code identifier
                         )
-                        viewModel.addPlant(newPlant)
-                        dismiss()
+                        
+                        if let onPlantAdded = onPlantAdded {
+                            onPlantAdded(newPlant)
+                        } else {
+                            do {
+                                try viewModel.addPlant(newPlant)
+                                dismiss()
+                            } catch {
+                                // Error handling is done in parent view
+                                print("Error adding plant: \(error)")
+                            }
+                        }
                     }
                     .disabled(nickname.isEmpty)
                 }

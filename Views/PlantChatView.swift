@@ -15,6 +15,7 @@ struct PlantChatView: View {
     @State private var isLoading: Bool = false
     @State private var errorMessage: String?
     @State private var hasTodaysMessage: Bool = false
+    @State private var showingSubscription = false
     
     var body: some View {
         NavigationView {
@@ -51,7 +52,7 @@ struct PlantChatView: View {
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 40)
                     } else if let error = errorMessage {
-                        VStack(spacing: 12) {
+                        VStack(spacing: 16) {
                             Image(systemName: "exclamationmark.triangle.fill")
                                 .font(.title)
                                 .foregroundColor(.orange)
@@ -59,6 +60,21 @@ struct PlantChatView: View {
                                 .font(.subheadline)
                                 .foregroundColor(.secondary)
                                 .multilineTextAlignment(.center)
+                            
+                            // Show subscribe button if subscription error
+                            if error.contains("Subscribe") || error.contains("subscription") {
+                                Button(action: {
+                                    showingSubscription = true
+                                }) {
+                                    Text("Subscribe Now")
+                                        .font(.headline)
+                                        .foregroundColor(.white)
+                                        .padding(.horizontal, 24)
+                                        .padding(.vertical, 12)
+                                        .background(Color(hex: "1B4332"))
+                                        .cornerRadius(12)
+                                }
+                            }
                         }
                         .frame(maxWidth: .infinity)
                         .padding()
@@ -152,6 +168,9 @@ struct PlantChatView: View {
             }
             .onAppear {
                 checkForTodaysMessage()
+            }
+            .sheet(isPresented: $showingSubscription) {
+                SubscriptionView()
             }
         }
     }

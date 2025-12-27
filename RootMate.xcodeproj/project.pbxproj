@@ -24,6 +24,8 @@
 		5678901234567890123456789012 /* QRCodeGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4567890123456789012345678901 /* QRCodeGenerator.swift */; };
 		8901234567890123456789012345 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9012345678901234567890123456 /* SettingsView.swift */; };
 		A123456789012345678901234567 /* PlantChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B23456789012345678901234567 /* PlantChatView.swift */; };
+		8A1F5914F2574A7D91943D11 /* SubscriptionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A399C042599047E59D19A993 /* SubscriptionService.swift */; };
+		C871829FBCF5441ABCB2E936 /* SubscriptionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A1BBBE6A96744C2930025A5 /* SubscriptionView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -50,6 +52,8 @@
 		D345678901234567890123456789 /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
 		F345678901234567890123456789 /* APIConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIConfiguration.swift; sourceTree = "<group>"; };
 		G456789012345678901234567890 /* KeychainService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainService.swift; sourceTree = "<group>"; };
+		A399C042599047E59D19A993 /* SubscriptionService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionService.swift; sourceTree = "<group>"; };
+		3A1BBBE6A96744C2930025A5 /* SubscriptionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionView.swift; sourceTree = "<group>"; };
 		EF6B176BE8656606445CD881 /* RootMate.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = RootMate.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -138,6 +142,7 @@
 				3456789012345678901234567890 /* QRCodeView.swift */,
 				9012345678901234567890123456 /* SettingsView.swift */,
 				B23456789012345678901234567 /* PlantChatView.swift */,
+				3A1BBBE6A96744C2930025A5 /* SubscriptionView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -151,6 +156,7 @@
 				D345678901234567890123456789 /* NotificationService.swift */,
 				F345678901234567890123456789 /* APIConfiguration.swift */,
 				G456789012345678901234567890 /* KeychainService.swift */,
+				A399C042599047E59D19A993 /* SubscriptionService.swift */,
 			);
 			path = Utilities;
 			sourceTree = "<group>";
@@ -236,6 +242,8 @@
 				5678901234567890123456789012 /* QRCodeGenerator.swift in Sources */,
 				8901234567890123456789012345 /* SettingsView.swift in Sources */,
 				A123456789012345678901234567 /* PlantChatView.swift in Sources */,
+				8A1F5914F2574A7D91943D11 /* SubscriptionService.swift in Sources */,
+				C871829FBCF5441ABCB2E936 /* SubscriptionView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -34,9 +34,9 @@ enum PlantVibe: String, CaseIterable, Codable {
         case .dramaQueen:
             return "💅"
         case .chillRoomie:
-            return "🌿"
+            return "😎"
         case .grumpySenior:
-            return "🌳"
+            return "🤨"
         case .sunshineBuddy:
             return "☀️"
         case .zenMaster:

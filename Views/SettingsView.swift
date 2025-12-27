@@ -12,6 +12,7 @@ struct SettingsView: View {
     @State private var notificationTime: Date
     @Environment(\.dismiss) var dismiss
     @ObservedObject var viewModel: PlantViewModel
+    @StateObject private var subscriptionService = SubscriptionService.shared
     
     private let notificationTimeKey = "notificationTime"
     private let userLocationKey = "userLocation"
@@ -20,6 +21,7 @@ struct SettingsView: View {
     @State private var userLocation: String
     @State private var notificationStatus: String = "Checking..."
     @State private var showingPermissionAlert = false
+    @State private var showingSubscription = false
     
     init(viewModel: PlantViewModel) {
         self.viewModel = viewModel
@@ -50,6 +52,55 @@ struct SettingsView: View {
     var body: some View {
         NavigationView {
             Form {
+                Section(header: Text("Subscription")) {
+                    HStack {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(subscriptionStatusText)
+                                .font(.headline)
+                                .foregroundColor(Color(hex: "1B4332"))
+                            
+                            Text(subscriptionDetailText)
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                        
+                        Spacer()
+                        
+                        if !subscriptionService.isSubscribed {
+                            Button(action: {
+                                showingSubscription = true
+                            }) {
+                                Text("Subscribe")
+                                    .font(.subheadline)
+                                    .fontWeight(.semibold)
+                                    .foregroundColor(.white)
+                                    .padding(.horizontal, 16)
+                                    .padding(.vertical, 8)
+                                    .background(Color(hex: "1B4332"))
+                                    .cornerRadius(8)
+                            }
+                        }
+                    }
+                    
+                    if subscriptionService.isSubscribed {
+                        Button(action: {
+                            // Open App Store subscription management
+                            if let url = URL(string: "https://apps.apple.com/account/subscriptions") {
+                                UIApplication.shared.open(url)
+                            }
+                        }) {
+                            HStack {
+                                Text("Manage Subscription")
+                                    .foregroundColor(.blue)
+                                Spacer()
+                                Image(systemName: "chevron.right")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
+                        }
+                    }
+                }
+                
                 Section(header: Text("AI Configuration")) {
                     TextField("Google Gemini API Key", text: $apiKey)
                         .textContentType(.password)
@@ -146,6 +197,42 @@ struct SettingsView: View {
                     }
                 }
             }
+            .sheet(isPresented: $showingSubscription) {
+                SubscriptionView()
+            }
+            .task {
+                await subscriptionService.checkSubscriptionStatus()
+            }
+        }
+    }
+    
+    private var subscriptionStatusText: String {
+        switch subscriptionService.subscriptionStatus {
+        case .subscribed:
+            return "Premium Active"
+        case .inTrial:
+            return "Free Trial Active"
+        case .notSubscribed:
+            return "Not Subscribed"
+        case .expired:
+            return "Subscription Expired"
+        case .unknown:
+            return "Subscription Status Unknown"
+        }
+    }
+    
+    private var subscriptionDetailText: String {
+        switch subscriptionService.subscriptionStatus {
+        case .subscribed:
+            return "You have access to daily updates for up to 5 plants"
+        case .inTrial:
+            return "Free trial active. \(viewModel.plants.count)/5 plants"
+        case .notSubscribed:
+            return "Subscribe to get daily updates for up to 5 plants"
+        case .expired:
+            return "Your subscription has expired"
+        case .unknown:
+            return "Unable to verify subscription status"
         }
     }
     
