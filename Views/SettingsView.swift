@@ -17,7 +17,6 @@ struct SettingsView: View {
     private let notificationTimeKey = "notificationTime"
     private let userLocationKey = "userLocation"
     
-    @State private var apiKey: String
     @State private var userLocation: String
     @State private var notificationStatus: String = "Checking..."
     @State private var showingPermissionAlert = false
@@ -25,9 +24,6 @@ struct SettingsView: View {
     
     init(viewModel: PlantViewModel) {
         self.viewModel = viewModel
-        // Load saved API key from secure Keychain storage
-        let savedApiKey = APIConfiguration.shared.getAPIKey() ?? ""
-        _apiKey = State(initialValue: savedApiKey)
         
         // Load saved user location
         let savedLocation = UserDefaults.standard.string(forKey: "userLocation") ?? ""
@@ -99,17 +95,6 @@ struct SettingsView: View {
                             }
                         }
                     }
-                }
-                
-                Section(header: Text("AI Configuration")) {
-                    TextField("Google Gemini API Key", text: $apiKey)
-                        .textContentType(.password)
-                        .autocapitalization(.none)
-                        .disableAutocorrection(true)
-                    
-                    Text("Enter your Google Gemini API key to enable daily chat messages. Get one at aistudio.google.com/app/apikey")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
                 }
                 
                 Section(header: Text("Location")) {
@@ -237,30 +222,6 @@ struct SettingsView: View {
     }
     
     private func saveNotificationTime() {
-        // Save API key securely to Keychain
-        if !apiKey.isEmpty {
-            let success = APIConfiguration.shared.setAPIKey(apiKey)
-            if success {
-                print("✅ API key saved to Keychain")
-            } else {
-                print("❌ Failed to save API key to Keychain")
-            }
-        } else {
-            // If empty, remove the key
-            APIConfiguration.shared.removeAPIKey()
-            print("🗑️ API key removed from Keychain")
-        }
-        
-        // Reload API key in view model
-        viewModel.reloadAPIKey()
-        
-        // Verify API key was loaded
-        if APIConfiguration.shared.hasAPIKey() {
-            print("✅ API key verified in view model")
-        } else {
-            print("⚠️ API key not found after reload")
-        }
-        
         // Extract just the time components and save
         let calendar = Calendar.current
         let hour = calendar.component(.hour, from: notificationTime)

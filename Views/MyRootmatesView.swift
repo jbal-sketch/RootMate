@@ -117,8 +117,6 @@ struct MyRootmatesView: View {
             }
             .onAppear {
                 viewModel.refreshAllStatuses()
-                // Configure AI if API key is available (loaded from secure Keychain)
-                viewModel.reloadAPIKey()
                 
                 // Store view model reference for notification handling
                 AppState.sharedViewModel = viewModel

@@ -47,24 +47,14 @@ class PlantViewModel: ObservableObject {
         self.currentUserId = currentUserId
         // Load sample data for demo
         loadSamplePlants()
-        // Automatically load API key from UserDefaults
-        loadAPIKey()
+        // Initialize AI service with backend URL
+        initializeAIService()
     }
     
-    func configureAI(apiKey: String) {
-        aiService = AIService(apiKey: apiKey)
-    }
-    
-    private func loadAPIKey() {
-        // Use secure Keychain storage instead of UserDefaults
-        if let apiKey = APIConfiguration.shared.getAPIKey() {
-            configureAI(apiKey: apiKey)
-        }
-        // No default key - user must configure their own API key
-    }
-    
-    func reloadAPIKey() {
-        loadAPIKey()
+    private func initializeAIService() {
+        // Use backend URL from APIConfiguration
+        let backendURL = APIConfiguration.shared.generateMessageURL.replacingOccurrences(of: "/api/generate-message", with: "")
+        aiService = AIService(backendURL: backendURL)
     }
     
     private func loadSamplePlants() {
@@ -219,13 +209,13 @@ class PlantViewModel: ObservableObject {
             }
         }
         
-        // Try to reload API key if service is not configured
+        // Initialize AI service if not already configured
         if aiService == nil {
-            reloadAPIKey()
+            initializeAIService()
         }
         
         guard let aiService = aiService else {
-            throw NSError(domain: "PlantViewModel", code: 1, userInfo: [NSLocalizedDescriptionKey: "AI service not configured. Please set Gemini API key in settings."])
+            throw NSError(domain: "PlantViewModel", code: 1, userInfo: [NSLocalizedDescriptionKey: "AI service not available. Please try again later."])
         }
         
         // Get weather data if user has a location set in settings

@@ -7,56 +7,40 @@
 
 import Foundation
 
-/// Manages API configuration and keys
+/// Manages API configuration
+/// Note: API keys are now handled by the backend server, so users no longer need to configure their own keys
 class APIConfiguration {
     static let shared = APIConfiguration()
     
-    private let keychain = KeychainService.shared
-    private let apiKeyKey = "gemini_api_key"
+    // Backend API base URL
+    // For production: Update this to your actual Vercel deployment URL
+    // For local development: "http://localhost:3000"
+    var backendBaseURL: String {
+        #if DEBUG
+        // Allow override via UserDefaults for local testing
+        if let customURL = UserDefaults.standard.string(forKey: "backend_api_url"), !customURL.isEmpty {
+            return customURL
+        }
+        return "http://localhost:3000"
+        #else
+        return "https://rootmate.vercel.app"
+        #endif
+    }
     
-    // For development: You can set a default key via build configuration
-    // In Xcode: Build Settings > Swift Compiler - Custom Flags > Other Swift Flags
-    // Add: -D DEBUG_API_KEY="your_key_here" (but still better to use Keychain)
-    #if DEBUG
-    // Only use this for local development, never commit real keys
-    // Better approach: Use Keychain or environment variables
-    private let debugAPIKey: String? = nil // Set to nil in production
-    #endif
+    /// Get the full backend API URL for generating messages
+    var generateMessageURL: String {
+        return "\(backendBaseURL)/api/generate-message"
+    }
     
     private init() {}
     
-    /// Get the stored API key
-    /// - Returns: The API key if available, nil otherwise
-    func getAPIKey() -> String? {
-        // Get from Keychain only - no hardcoded keys
-        if let key = keychain.get(apiKeyKey), !key.isEmpty {
-            return key
-        }
-        
-        // No default key - user must configure their own API key in Settings
-        return nil
-    }
+    // Legacy methods kept for backward compatibility but no longer used
+    // These can be removed in a future version if not needed
     
-    /// Store an API key securely
-    /// - Parameter key: The API key to store
-    /// - Returns: True if successful, false otherwise
-    func setAPIKey(_ key: String) -> Bool {
-        guard !key.isEmpty else {
-            return false
-        }
-        return keychain.set(key, forKey: apiKeyKey)
-    }
-    
-    /// Check if an API key is configured
-    /// - Returns: True if an API key exists, false otherwise
+    /// Check if API is configured (always returns true now since backend handles keys)
+    /// - Returns: Always returns true
     func hasAPIKey() -> Bool {
-        return getAPIKey() != nil
-    }
-    
-    /// Remove the stored API key
-    /// - Returns: True if successful, false otherwise
-    func removeAPIKey() -> Bool {
-        return keychain.delete(apiKeyKey)
+        return true // Backend always has API key configured
     }
 }
 

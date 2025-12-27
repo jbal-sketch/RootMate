@@ -75,14 +75,7 @@ class NotificationService {
     func generateDailyMessagesForAllPlants(viewModel: PlantViewModel) async {
         print("🌱 Generating daily messages for all plants...")
         
-        // Ensure API key is loaded before generating messages
-        viewModel.reloadAPIKey()
-        
-        // Check if API key is configured
-        if !APIConfiguration.shared.hasAPIKey() {
-            print("⚠️ API key not configured. Please set Gemini API key in Settings.")
-            return
-        }
+        // AI service is automatically configured via backend - no API key needed
         
         // Access plants on main actor
         let plants = viewModel.plants
