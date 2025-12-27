@@ -33,8 +33,12 @@ marketing/
 ## Setup
 
 1. Add your images to the `images/` folder:
-   - `hero-app-preview.png` - App screenshot for hero section
-   - `app-store-badge.svg` - App Store download badge
+   - `rootmate-logo.png` - RootMate logo (cartoon plant with text) for navigation and footer
+   - `woman-using-app.jpg` - Hero image showing woman using the app with plants
+   - `pot-with-qr-stickers.jpg` - Terracotta pot with QR code stickers for feature section
+   - `app-store-badge.svg` - App Store download badge (optional)
+   
+   See `images/IMAGE_REQUIREMENTS.md` for detailed specifications.
 
 2. Customize the content:
    - Update text in `index.html`
