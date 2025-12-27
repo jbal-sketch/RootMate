@@ -50,6 +50,8 @@ body {
 .nav-brand {
     display: flex;
     align-items: center;
+    flex-shrink: 0;
+    order: -1;
 }
 
 .nav-brand a {
@@ -72,6 +74,7 @@ body {
     display: flex;
     list-style: none;
     gap: 2rem;
+    margin-left: auto;
 }
 
 .nav-menu a {
