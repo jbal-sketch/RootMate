@@ -10,6 +10,13 @@
 		09E95100E8758422991CCF2A /* RootMateApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35107907A60AF2CF75031C0B /* RootMateApp.swift */; };
 		28782D99A6DFF527EBE87849 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 43B45A08578403C3D43BD165 /* Assets.xcassets */; };
 		CB4877259F884AFFAF268414 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDD55B34A12702B9E4C65A65 /* ContentView.swift */; };
+		A1B2C3D4E5F6789012345678 /* Plant.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2C3D4E5F678901234567890 /* Plant.swift */; };
+		B1C2D3E4F5678901234567890 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3D4E5F67890123456789012 /* User.swift */; };
+		C1D2E3F4567890123456789012 /* PlantViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E5F6789012345678901234 /* PlantViewModel.swift */; };
+		D1E2F3456789012345678901234 /* WeatherService.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5F6789012345678901234567 /* WeatherService.swift */; };
+		E1F2345678901234567890123456 /* AIService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6789012345678901234567890 /* AIService.swift */; };
+		F12345678901234567890123456 /* MyRoommatesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67890123456789012345678901 /* MyRoommatesView.swift */; };
+		1234567890123456789012345678 /* AISystemPrompts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78901234567890123456789012 /* AISystemPrompts.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -22,6 +29,13 @@
 		7C1BF79DA4B58414B6E69BC6 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
 		84CE18D163DD3643F88DB4AF /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
 		BDD55B34A12702B9E4C65A65 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		B2C3D4E5F678901234567890 /* Plant.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Plant.swift; sourceTree = "<group>"; };
+		C3D4E5F67890123456789012 /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
+		D4E5F6789012345678901234 /* PlantViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlantViewModel.swift; sourceTree = "<group>"; };
+		E5F6789012345678901234567 /* WeatherService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherService.swift; sourceTree = "<group>"; };
+		F6789012345678901234567890 /* AIService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIService.swift; sourceTree = "<group>"; };
+		67890123456789012345678901 /* MyRoommatesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyRoommatesView.swift; sourceTree = "<group>"; };
+		78901234567890123456789012 /* AISystemPrompts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AISystemPrompts.swift; sourceTree = "<group>"; };
 		EF6B176BE8656606445CD881 /* RootMate.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = RootMate.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -61,6 +75,8 @@
 			isa = PBXGroup;
 			children = (
 				115F189D809B6F22CD80974D /* .gitkeep */,
+				E5F6789012345678901234567 /* WeatherService.swift */,
+				F6789012345678901234567890 /* AIService.swift */,
 			);
 			path = Network;
 			sourceTree = "<group>";
@@ -85,6 +101,8 @@
 			isa = PBXGroup;
 			children = (
 				7C1BF79DA4B58414B6E69BC6 /* .gitkeep */,
+				B2C3D4E5F678901234567890 /* Plant.swift */,
+				C3D4E5F67890123456789012 /* User.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -93,6 +111,7 @@
 			isa = PBXGroup;
 			children = (
 				3779E4FD1DAF309D5F6C10D5 /* .gitkeep */,
+				D4E5F6789012345678901234 /* PlantViewModel.swift */,
 			);
 			path = ViewModels;
 			sourceTree = "<group>";
@@ -101,6 +120,7 @@
 			isa = PBXGroup;
 			children = (
 				BDD55B34A12702B9E4C65A65 /* ContentView.swift */,
+				67890123456789012345678901 /* MyRoommatesView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -109,6 +129,7 @@
 			isa = PBXGroup;
 			children = (
 				075E31D4942F9BA051BEEAAA /* .gitkeep */,
+				78901234567890123456789012 /* AISystemPrompts.swift */,
 			);
 			path = Utilities;
 			sourceTree = "<group>";
@@ -180,6 +201,13 @@
 			files = (
 				CB4877259F884AFFAF268414 /* ContentView.swift in Sources */,
 				09E95100E8758422991CCF2A /* RootMateApp.swift in Sources */,
+				A1B2C3D4E5F6789012345678 /* Plant.swift in Sources */,
+				B1C2D3E4F5678901234567890 /* User.swift in Sources */,
+				C1D2E3F4567890123456789012 /* PlantViewModel.swift in Sources */,
+				D1E2F3456789012345678901234 /* WeatherService.swift in Sources */,
+				E1F2345678901234567890123456 /* AIService.swift in Sources */,
+				F12345678901234567890123456 /* MyRoommatesView.swift in Sources */,
+				1234567890123456789012345678 /* AISystemPrompts.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

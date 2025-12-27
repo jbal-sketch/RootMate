@@ -195,13 +195,13 @@ body {
 
 .features-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 2rem;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
 }
 
 .feature-card {
     background: var(--bg-light);
-    padding: 2rem;
+    padding: 1.5rem;
     border-radius: 12px;
     text-align: center;
     transition: transform 0.3s, box-shadow 0.3s;
@@ -214,19 +214,20 @@ body {
 }
 
 .feature-icon {
-    font-size: 3rem;
-    margin-bottom: 1rem;
+    font-size: 2.5rem;
+    margin-bottom: 0.75rem;
 }
 
 .feature-card h3 {
     color: var(--primary-color);
-    margin-bottom: 1rem;
-    font-size: 1.5rem;
+    margin-bottom: 0.75rem;
+    font-size: 1.25rem;
 }
 
 .feature-card p {
     color: var(--text-light);
-    line-height: 1.8;
+    line-height: 1.6;
+    font-size: 0.95rem;
 }
 
 /* QR Feature Section */

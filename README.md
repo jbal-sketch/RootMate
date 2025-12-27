@@ -1,5 +1,7 @@
 # RootMate iOS App
 
+> **For Contributors**: This project is built to production standards by experienced iOS and HTML engineers. Please read [CONTRIBUTING.md](CONTRIBUTING.md) before contributing to understand our development philosophy and standards.
+
 ## Project Structure
 
 ```
