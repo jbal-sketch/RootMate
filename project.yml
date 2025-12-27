@@ -1,0 +1,29 @@
+name: RootMate
+options:
+  bundleIdPrefix: com.rootmate
+  deploymentTarget:
+    iOS: "15.0"
+  developmentLanguage: en
+  xcodeVersion: "15.0"
+
+targets:
+  RootMate:
+    type: application
+    platform: iOS
+    sources:
+      - path: .
+        excludes:
+          - "*.md"
+          - "*.yml"
+          - ".git"
+          - ".gitignore"
+    resources:
+      - Assets.xcassets
+      - Info.plist
+    settings:
+      PRODUCT_BUNDLE_IDENTIFIER: com.rootmate.RootMate
+      INFOPLIST_FILE: Info.plist
+      SWIFT_VERSION: "5.0"
+      TARGETED_DEVICE_FAMILY: "1" # iPhone only
+      IPHONEOS_DEPLOYMENT_TARGET: "15.0"
+
