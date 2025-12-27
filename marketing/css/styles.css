@@ -47,10 +47,25 @@ body {
     align-items: center;
 }
 
-.nav-brand h1 {
-    color: var(--primary-color);
-    font-size: 1.5rem;
-    font-weight: 700;
+.nav-brand {
+    display: flex;
+    align-items: center;
+}
+
+.nav-brand a {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+}
+
+.logo {
+    height: 50px;
+    width: auto;
+    transition: transform 0.3s;
+}
+
+.logo:hover {
+    transform: scale(1.05);
 }
 
 .nav-menu {
@@ -211,10 +226,58 @@ body {
     line-height: 1.8;
 }
 
+/* QR Feature Section */
+.qr-feature {
+    padding: 5rem 0;
+    background: var(--bg-light);
+}
+
+.qr-feature-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    align-items: center;
+}
+
+.qr-feature-image {
+    text-align: center;
+}
+
+.qr-preview {
+    max-width: 100%;
+    height: auto;
+    border-radius: 20px;
+    box-shadow: var(--shadow-hover);
+}
+
+.qr-feature-text {
+    padding: 2rem;
+}
+
+.feature-description {
+    font-size: 1.1rem;
+    color: var(--text-light);
+    margin-bottom: 2rem;
+    line-height: 1.8;
+}
+
+.feature-list {
+    list-style: none;
+    padding: 0;
+}
+
+.feature-list li {
+    font-size: 1.1rem;
+    color: var(--text-color);
+    margin-bottom: 1rem;
+    padding-left: 0;
+    line-height: 1.8;
+}
+
 /* About Section */
 .about {
     padding: 5rem 0;
-    background: var(--bg-light);
+    background: var(--bg-color);
 }
 
 .about-content {
@@ -277,6 +340,14 @@ body {
     margin-bottom: 2rem;
 }
 
+.footer-logo {
+    height: 60px;
+    width: auto;
+    margin-bottom: 1rem;
+    filter: brightness(0) invert(1);
+    opacity: 0.9;
+}
+
 .footer-section h3,
 .footer-section h4 {
     color: white;
@@ -333,6 +404,14 @@ body {
 
     .features-grid {
         grid-template-columns: 1fr;
+    }
+
+    .qr-feature-content {
+        grid-template-columns: 1fr;
+    }
+
+    .qr-feature-image {
+        order: -1;
     }
 }
 
