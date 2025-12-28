@@ -15,16 +15,7 @@ class APIConfiguration {
     // Backend API base URL
     // Production Vercel deployment URL
     var backendBaseURL: String {
-        #if DEBUG
-        // Allow override via UserDefaults for local testing
-        if let customURL = UserDefaults.standard.string(forKey: "backend_api_url"), !customURL.isEmpty {
-            return customURL
-        }
-        // Default to production URL in DEBUG mode (can be overridden in Settings)
         return "https://root-mate.vercel.app"
-        #else
-        return "https://root-mate.vercel.app"
-        #endif
     }
     
     /// Get the full backend API URL for generating messages

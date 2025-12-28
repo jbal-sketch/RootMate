@@ -116,40 +116,6 @@ struct SettingsView: View {
                     Text("Enable this to test all premium features without a subscription. Only available in DEBUG builds.")
                         .font(.caption)
                         .foregroundColor(.secondary)
-                    
-                    Divider()
-                    
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Backend API URL")
-                            .font(.subheadline)
-                            .fontWeight(.medium)
-                        
-                        TextField("https://root-mate.vercel.app", text: Binding(
-                            get: {
-                                UserDefaults.standard.string(forKey: "backend_api_url") ?? "https://root-mate.vercel.app"
-                            },
-                            set: { newValue in
-                                if newValue.isEmpty {
-                                    UserDefaults.standard.removeObject(forKey: "backend_api_url")
-                                } else {
-                                    UserDefaults.standard.set(newValue, forKey: "backend_api_url")
-                                }
-                            }
-                        ))
-                        .autocapitalization(.none)
-                        .autocorrectionDisabled()
-                        .keyboardType(.URL)
-                        
-                        Text("Configure the backend API URL. Defaults to production URL.")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                        
-                        Button("Use Production URL") {
-                            UserDefaults.standard.set("https://root-mate.vercel.app", forKey: "backend_api_url")
-                        }
-                        .font(.caption)
-                        .foregroundColor(.blue)
-                    }
                 }
                 #endif
                 
