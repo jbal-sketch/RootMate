@@ -23,6 +23,29 @@ class SubscriptionService: ObservableObject {
     private var updateListenerTask: Task<Void, Error>?
     private var currentEntitlements: [Product.SubscriptionInfo.Status] = []
     
+    // MARK: - Debug Bypass (DEBUG builds only)
+    #if DEBUG
+    private let bypassKey = "debugBypassSubscription"
+    
+    /// Enable/disable subscription bypass for testing (DEBUG builds only)
+    var debugBypassEnabled: Bool {
+        get {
+            UserDefaults.standard.bool(forKey: bypassKey)
+        }
+        set {
+            UserDefaults.standard.set(newValue, forKey: bypassKey)
+            // Update status immediately when toggled
+            if newValue {
+                subscriptionStatus = .subscribed
+            } else {
+                Task {
+                    await checkSubscriptionStatus()
+                }
+            }
+        }
+    }
+    #endif
+    
     enum SubscriptionStatus {
         case notSubscribed
         case inTrial
@@ -64,8 +87,26 @@ class SubscriptionService: ObservableObject {
     // MARK: - Product Loading
     
     func loadProducts() async throws -> Product? {
-        let products = try await Product.products(for: [productId])
-        return products.first
+        do {
+            let products = try await Product.products(for: [productId])
+            
+            if products.isEmpty {
+                print("⚠️ No products found for ID: \(productId)")
+                print("💡 Make sure:")
+                print("   1. Product ID matches App Store Connect exactly: \(productId)")
+                print("   2. Subscription is created and approved in App Store Connect")
+                print("   3. You're testing with a sandbox account (not simulator)")
+                throw SubscriptionError.productNotFound
+            }
+            
+            return products.first
+        } catch {
+            print("❌ Failed to load products: \(error)")
+            if let storeKitError = error as? StoreKitError {
+                print("   StoreKit error: \(storeKitError)")
+            }
+            throw error
+        }
     }
     
     // MARK: - Purchase
@@ -128,24 +169,28 @@ class SubscriptionService: ObservableObject {
                             if let subscriptionInfo = try? await transaction.subscriptionStatus {
                                 // Check subscription state
                                 switch subscriptionInfo.state {
-                                case .subscribed, .inGracePeriod, .inBillingRetryPeriod:
+                                case .subscribed:
                                     // Check if we're in trial period by looking at purchase date
-                                    // Trial is 7 days, so if purchase was within last 7 days, likely in trial
                                     let purchaseDate = transaction.purchaseDate
                                     let daysSincePurchase = Calendar.current.dateComponents([.day], from: purchaseDate, to: Date()).day ?? 0
                                     
-                                    // If purchased within last 7 days, assume trial (StoreKit 2 will handle this properly)
-                                    // We can also check the renewal info for more details
                                     if daysSincePurchase <= 7 {
-                                        // Check if there's a renewal date that's 7 days from purchase
-                                        // This is a heuristic - StoreKit 2 should provide this info
                                         status = .inTrial
                                     } else {
                                         status = .subscribed
                                     }
-                                case .revoked, .expired:
+                                case .inGracePeriod:
+                                    // Grace period - treat as subscribed
+                                    status = .subscribed
+                                case .inBillingRetryPeriod:
+                                    // Billing retry period - treat as subscribed
+                                    status = .subscribed
+                                case .revoked:
                                     status = .expired
-                                @unknown default:
+                                case .expired:
+                                    status = .expired
+                                default:
+                                    // Handle any other cases (including future enum additions)
                                     status = .unknown
                                 }
                             } else {
@@ -177,7 +222,7 @@ class SubscriptionService: ObservableObject {
     
     // MARK: - Verification
     
-    private func checkVerified<T>(_ result: VerificationResult<T>) throws -> T {
+    nonisolated private func checkVerified<T>(_ result: VerificationResult<T>) throws -> T {
         switch result {
         case .unverified:
             throw SubscriptionError.failedVerification
@@ -189,6 +234,13 @@ class SubscriptionService: ObservableObject {
     // MARK: - Helper Methods
     
     var isSubscribed: Bool {
+        #if DEBUG
+        // Bypass subscription checks in DEBUG builds if enabled
+        if debugBypassEnabled {
+            return true
+        }
+        #endif
+        
         switch subscriptionStatus {
         case .subscribed, .inTrial:
             return true
@@ -198,10 +250,22 @@ class SubscriptionService: ObservableObject {
     }
     
     var isInTrial: Bool {
-        subscriptionStatus == .inTrial
+        #if DEBUG
+        if debugBypassEnabled {
+            return false // When bypassed, treat as fully subscribed
+        }
+        #endif
+        return subscriptionStatus == .inTrial
     }
     
     var canAddMorePlants: Bool {
+        #if DEBUG
+        // Bypass subscription checks in DEBUG builds if enabled
+        if debugBypassEnabled {
+            return true
+        }
+        #endif
+        
         // Subscribers can have up to 5 plants
         return isSubscribed
     }
