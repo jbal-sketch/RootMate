@@ -2,6 +2,11 @@
   "buildCommand": null,
   "outputDirectory": "marketing",
   "framework": null,
+  "functions": {
+    "api/**/*.ts": {
+      "runtime": "@vercel/node"
+    }
+  },
   "rewrites": [
     {
       "source": "/plant/:plantId",
