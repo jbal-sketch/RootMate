@@ -72,7 +72,7 @@ Generates an AI-powered message from a plant using Google Gemini API.
 
 4. Test the endpoint:
    ```bash
-   curl -X POST https://rootmate.vercel.app/api/generate-message \
+   curl -X POST https://root-mate.vercel.app/api/generate-message \
      -H "Content-Type: application/json" \
      -d '{"plant": {...}, "systemPrompt": "..."}'
    ```

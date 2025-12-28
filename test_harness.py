@@ -7,7 +7,7 @@ Usage:
     python3 test_harness.py [--url URL] [--vibe VIBE] [--all]
 
 Options:
-    --url URL          Backend API URL (default: https://rootmate.vercel.app)
+    --url URL          Backend API URL (default: https://root-mate.vercel.app)
     --vibe VIBE        Test specific vibe (Drama Queen, Chill Roomie, etc.)
     --all              Run all test suites
     --quick            Run quick connectivity test only
@@ -24,7 +24,7 @@ from datetime import datetime, timedelta
 from typing import Optional, Dict, List, Tuple
 
 # Default configuration
-DEFAULT_BACKEND_URL = "https://rootmate.vercel.app"
+DEFAULT_BACKEND_URL = "https://root-mate.vercel.app"
 API_ENDPOINT = "/api/generate-message"
 
 # Plant vibes

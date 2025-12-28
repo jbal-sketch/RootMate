@@ -59,7 +59,7 @@ This will:
 
 ```bash
 # Test production API
-curl -X POST https://rootmate.vercel.app/api/generate-message \
+   curl -X POST https://root-mate.vercel.app/api/generate-message \
   -H "Content-Type: application/json" \
   -d '{
     "plant": {

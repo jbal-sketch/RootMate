@@ -21,9 +21,9 @@ class APIConfiguration {
             return customURL
         }
         // Default to production URL in DEBUG mode (can be overridden in Settings)
-        return "https://rootmate.vercel.app"
+        return "https://root-mate.vercel.app"
         #else
-        return "https://rootmate.vercel.app"
+        return "https://root-mate.vercel.app"
         #endif
     }
     

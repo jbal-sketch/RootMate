@@ -124,9 +124,9 @@ struct SettingsView: View {
                             .font(.subheadline)
                             .fontWeight(.medium)
                         
-                        TextField("https://rootmate.vercel.app", text: Binding(
+                        TextField("https://root-mate.vercel.app", text: Binding(
                             get: {
-                                UserDefaults.standard.string(forKey: "backend_api_url") ?? "https://rootmate.vercel.app"
+                                UserDefaults.standard.string(forKey: "backend_api_url") ?? "https://root-mate.vercel.app"
                             },
                             set: { newValue in
                                 if newValue.isEmpty {
@@ -145,7 +145,7 @@ struct SettingsView: View {
                             .foregroundColor(.secondary)
                         
                         Button("Use Production URL") {
-                            UserDefaults.standard.set("https://rootmate.vercel.app", forKey: "backend_api_url")
+                            UserDefaults.standard.set("https://root-mate.vercel.app", forKey: "backend_api_url")
                         }
                         .font(.caption)
                         .foregroundColor(.blue)
