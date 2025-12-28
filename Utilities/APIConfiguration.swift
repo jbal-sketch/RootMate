@@ -13,15 +13,15 @@ class APIConfiguration {
     static let shared = APIConfiguration()
     
     // Backend API base URL
-    // For production: Update this to your actual Vercel deployment URL
-    // For local development: "http://localhost:3000"
+    // Production Vercel deployment URL
     var backendBaseURL: String {
         #if DEBUG
         // Allow override via UserDefaults for local testing
         if let customURL = UserDefaults.standard.string(forKey: "backend_api_url"), !customURL.isEmpty {
             return customURL
         }
-        return "http://localhost:3000"
+        // Default to production URL in DEBUG mode (can be overridden in Settings)
+        return "https://rootmate.vercel.app"
         #else
         return "https://rootmate.vercel.app"
         #endif

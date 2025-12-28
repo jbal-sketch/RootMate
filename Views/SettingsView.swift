@@ -126,7 +126,7 @@ struct SettingsView: View {
                         
                         TextField("https://rootmate.vercel.app", text: Binding(
                             get: {
-                                UserDefaults.standard.string(forKey: "backend_api_url") ?? "http://localhost:3000"
+                                UserDefaults.standard.string(forKey: "backend_api_url") ?? "https://rootmate.vercel.app"
                             },
                             set: { newValue in
                                 if newValue.isEmpty {
@@ -140,7 +140,7 @@ struct SettingsView: View {
                         .autocorrectionDisabled()
                         .keyboardType(.URL)
                         
-                        Text("Leave empty to use default (localhost:3000). Set to production URL if local server isn't running.")
+                        Text("Configure the backend API URL. Defaults to production URL.")
                             .font(.caption)
                             .foregroundColor(.secondary)
                         
