@@ -18,7 +18,7 @@ DEFAULT_API_KEY = "AIzaSyBGaMbsDgg0kvsCGWBXuHF70ERjeyaQnww"
 
 # API Configuration
 BASE_URL = "https://generativelanguage.googleapis.com/v1beta/models"
-MODEL = "gemini-2.5-flash"  # Using available model from API
+MODEL = "gemini-2.5-flash-lite"  # Cheaper model, matches production API
 
 class Plant:
     def __init__(self, nickname: str, species: str, vibe: str, status: str = "Hydrated", 
