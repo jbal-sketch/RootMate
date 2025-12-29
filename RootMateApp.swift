@@ -31,23 +31,6 @@ struct RootMateApp: App {
                         }
                     }
                 }
-                .onReceive(NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)) { _ in
-                    // When app enters foreground, check if we need to generate messages
-                    // This handles the case where notifications fired while app was in background
-                    Task {
-                        if let viewModel = AppState.sharedViewModel {
-                            await viewModel.generateDailyMessagesIfNeeded()
-                        }
-                    }
-                }
-                .onReceive(NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)) { _ in
-                    // Also check when app becomes active
-                    Task {
-                        if let viewModel = AppState.sharedViewModel {
-                            await viewModel.generateDailyMessagesIfNeeded()
-                        }
-                    }
-                }
         }
     }
     

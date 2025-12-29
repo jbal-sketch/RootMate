@@ -43,6 +43,9 @@ class PlantViewModel: ObservableObject {
     private var aiService: AIService?
     @Published var subscriptionService = SubscriptionService.shared
     
+    // Flag to prevent concurrent message generation
+    private var isGeneratingMessages = false
+    
     init(currentUserId: UUID = UUID()) {
         self.currentUserId = currentUserId
         // Load sample data for demo
@@ -79,12 +82,18 @@ class PlantViewModel: ObservableObject {
     
     // Generate initial welcome message for first-time users
     func generateInitialMessageIfNeeded() async {
+        // Prevent concurrent generation
+        guard !isGeneratingMessages else { return }
+        
         // Check if this is a first-time launch (no messages generated yet)
         let hasGeneratedInitialMessage = UserDefaults.standard.bool(forKey: "hasGeneratedInitialMessage")
         
         guard !hasGeneratedInitialMessage, let firstPlant = plants.first else {
             return
         }
+        
+        isGeneratingMessages = true
+        defer { isGeneratingMessages = false }
         
         // Initialize AI service if needed
         if aiService == nil {
@@ -336,6 +345,9 @@ class PlantViewModel: ObservableObject {
     
     // Generate daily messages for all plants if it's past notification time
     func generateDailyMessagesIfNeeded() async {
+        // Prevent concurrent generation
+        guard !isGeneratingMessages else { return }
+        
         // Get notification time from UserDefaults
         let calendar = Calendar.current
         let now = Date()
@@ -358,6 +370,9 @@ class PlantViewModel: ObservableObject {
         guard now >= notificationTime else {
             return
         }
+        
+        isGeneratingMessages = true
+        defer { isGeneratingMessages = false }
         
         // Generate messages for all plants that don't have today's message
         for plant in plants {
