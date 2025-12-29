@@ -58,35 +58,89 @@ class PlantViewModel: ObservableObject {
     }
     
     private func loadSamplePlants() {
+        // Single default plant: Monstera with "needs watered" status and streak 0
         plants = [
             Plant(
                 userId: currentUserId,
-                nickname: "Fiona",
-                species: "Fiddle Leaf Fig",
-                vibe: .dramaQueen,
-                status: .thirsty,
-                lastWatered: Calendar.current.date(byAdding: .day, value: -3, to: Date()),
-                healthStreak: 5
-            ),
-            Plant(
-                userId: currentUserId,
-                nickname: "Basil",
-                species: "Basil",
+                nickname: "Monty",
+                species: "Monstera Deliciosa",
                 vibe: .chillRoomie,
-                status: .hydrated,
-                lastWatered: Calendar.current.date(byAdding: .day, value: -1, to: Date()),
-                healthStreak: 12
-            ),
-            Plant(
-                userId: currentUserId,
-                nickname: "Winston",
-                species: "Snake Plant",
-                vibe: .grumpySenior,
-                status: .hydrated,
-                lastWatered: Calendar.current.date(byAdding: .day, value: -5, to: Date()),
-                healthStreak: 30
+                status: .thirsty,
+                lastWatered: nil,
+                healthStreak: 0
             )
         ]
+        
+        // Set default location to London if not already set
+        if UserDefaults.standard.string(forKey: "userLocation") == nil || UserDefaults.standard.string(forKey: "userLocation")?.isEmpty == true {
+            UserDefaults.standard.set("London", forKey: "userLocation")
+        }
+    }
+    
+    // Generate initial welcome message for first-time users
+    func generateInitialMessageIfNeeded() async {
+        // Check if this is a first-time launch (no messages generated yet)
+        let hasGeneratedInitialMessage = UserDefaults.standard.bool(forKey: "hasGeneratedInitialMessage")
+        
+        guard !hasGeneratedInitialMessage, let firstPlant = plants.first else {
+            return
+        }
+        
+        // Initialize AI service if needed
+        if aiService == nil {
+            initializeAIService()
+        }
+        
+        guard let aiService = aiService else {
+            return
+        }
+        
+        // Get weather data for London (default location)
+        var weatherData: WeatherData? = nil
+        let location = UserDefaults.standard.string(forKey: "userLocation") ?? "London"
+        
+        do {
+            let coordinates = try await weatherService.getCoordinates(for: location)
+            weatherData = try await weatherService.fetchWeather(latitude: coordinates.latitude, longitude: coordinates.longitude)
+        } catch {
+            print("Failed to fetch weather for initial message: \(error)")
+        }
+        
+        // Get system prompt for the plant's vibe
+        let systemPrompt = AISystemPrompts.getPrompt(for: firstPlant.species, vibe: firstPlant.vibe)
+        
+        do {
+            // Generate the initial message
+            let message = try await aiService.generatePlantMessage(
+                plant: firstPlant,
+                weatherData: weatherData,
+                systemPrompt: systemPrompt
+            )
+            
+            // Store message in feed
+            let plantMessage = PlantMessage(
+                plantId: firstPlant.id,
+                plantNickname: firstPlant.nickname,
+                plantSpecies: firstPlant.species,
+                plantVibe: firstPlant.vibe,
+                message: message
+            )
+            recentMessages.insert(plantMessage, at: 0)
+            
+            // Mark as done so we don't generate again
+            UserDefaults.standard.set(true, forKey: "hasGeneratedInitialMessage")
+        } catch {
+            print("Failed to generate initial welcome message: \(error)")
+        }
+    }
+    
+    // Delete a plant
+    func deletePlant(_ plantId: UUID) {
+        plants.removeAll { $0.id == plantId }
+        // Also remove any messages from this plant
+        recentMessages.removeAll { $0.plantId == plantId }
+        // Reschedule notifications
+        scheduleNotificationsForAllPlants()
     }
     
     func addPlant(_ plant: Plant) throws {
@@ -125,7 +179,9 @@ class PlantViewModel: ObservableObject {
         var errorDescription: String? {
             switch self {
             case .subscriptionRequired:
-                return "Subscribe to RootMate Premium to add more than \(SubscriptionService.shared.maxPlants) plants. Get daily updates for up to \(SubscriptionService.shared.maxPlants) plants with a 7-day free trial."
+                // Use constant value to avoid main actor isolation issue
+                let maxPlants = 5
+                return "Subscribe to RootMate Premium to add more than \(maxPlants) plants. Get daily updates for up to \(maxPlants) plants with a 7-day free trial."
             case .plantLimitReached(let maxPlants):
                 return "You've reached the limit of \(maxPlants) plants. Upgrade to add more plants."
             case .subscriptionRequiredForDailyUpdates:

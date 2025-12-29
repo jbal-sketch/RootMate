@@ -343,6 +343,98 @@ def test_with_weather(base_url: str) -> TestResult:
         weather_data=weather_data
     )
 
+def test_base_url(base_url: str) -> TestResult:
+    """Test if the base URL is accessible"""
+    start_time = datetime.now()
+    try:
+        req = urllib.request.Request(base_url, method="GET")
+        ssl_context = ssl.create_default_context()
+        ssl_context.check_hostname = False
+        ssl_context.verify_mode = ssl.CERT_NONE
+        
+        with urllib.request.urlopen(req, timeout=10, context=ssl_context) as response:
+            duration = (datetime.now() - start_time).total_seconds()
+            return TestResult(
+                "Base URL Accessibility",
+                True,
+                f"Base URL is accessible (Status: {response.status}, Duration: {duration:.2f}s)",
+                duration
+            )
+    except Exception as e:
+        duration = (datetime.now() - start_time).total_seconds()
+        return TestResult(
+            "Base URL Accessibility",
+            False,
+            f"Base URL not accessible: {str(e)}",
+            duration
+        )
+
+def test_api_endpoint_exists(base_url: str) -> TestResult:
+    """Test if the API endpoint exists (even if it returns an error)"""
+    start_time = datetime.now()
+    url = f"{base_url}{API_ENDPOINT}"
+    
+    try:
+        # Try OPTIONS request first (should work even if POST doesn't)
+        req = urllib.request.Request(url, method="OPTIONS")
+        req.add_header("Content-Type", "application/json")
+        ssl_context = ssl.create_default_context()
+        ssl_context.check_hostname = False
+        ssl_context.verify_mode = ssl.CERT_NONE
+        
+        with urllib.request.urlopen(req, timeout=10, context=ssl_context) as response:
+            duration = (datetime.now() - start_time).total_seconds()
+            return TestResult(
+                "API Endpoint Exists",
+                True,
+                f"API endpoint exists (Status: {response.status}, Duration: {duration:.2f}s)",
+                duration
+            )
+    except urllib.error.HTTPError as e:
+        duration = (datetime.now() - start_time).total_seconds()
+        # 404 means endpoint doesn't exist, other errors mean it exists but has issues
+        if e.code == 404:
+            return TestResult(
+                "API Endpoint Exists",
+                False,
+                f"API endpoint NOT FOUND (404) - Function not deployed",
+                duration
+            )
+        else:
+            return TestResult(
+                "API Endpoint Exists",
+                True,
+                f"API endpoint exists but returned {e.code} (endpoint is deployed)",
+                duration
+            )
+    except Exception as e:
+        duration = (datetime.now() - start_time).total_seconds()
+        return TestResult(
+            "API Endpoint Exists",
+            False,
+            f"Error checking endpoint: {str(e)}",
+            duration
+        )
+
+def run_diagnostics(base_url: str) -> List[TestResult]:
+    """Run comprehensive diagnostics"""
+    print_header("Diagnostic Tests")
+    results = []
+    
+    # Test 1: Base URL accessibility
+    print_info("Testing base URL accessibility...")
+    results.append(test_base_url(base_url))
+    
+    # Test 2: API endpoint existence
+    print_info("Testing if API endpoint exists...")
+    results.append(test_api_endpoint_exists(base_url))
+    
+    # Test 3: Full API connectivity
+    print_info("Testing full API connectivity...")
+    results.append(test_api_connectivity(base_url))
+    
+    return results
+
 def run_quick_test(base_url: str) -> List[TestResult]:
     """Run a quick connectivity test"""
     print_header("Quick Connectivity Test")
@@ -406,6 +498,7 @@ def main():
     parser.add_argument("--vibe", choices=PLANT_VIBES, help="Test specific vibe")
     parser.add_argument("--all", action="store_true", help="Run all test suites")
     parser.add_argument("--quick", action="store_true", help="Run quick connectivity test only")
+    parser.add_argument("--diagnose", action="store_true", help="Run diagnostic tests to identify issues")
     
     args = parser.parse_args()
     
@@ -415,7 +508,9 @@ def main():
     print_info(f"Testing endpoint: {base_url}{API_ENDPOINT}")
     print()
     
-    if args.quick:
+    if args.diagnose:
+        results = run_diagnostics(base_url)
+    elif args.quick:
         results = run_quick_test(base_url)
     elif args.vibe:
         print_header(f"Testing {args.vibe} Vibe")

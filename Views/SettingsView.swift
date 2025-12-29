@@ -18,8 +18,6 @@ struct SettingsView: View {
     private let userLocationKey = "userLocation"
     
     @State private var userLocation: String
-    @State private var notificationStatus: String = "Checking..."
-    @State private var showingPermissionAlert = false
     @State private var showingSubscription = false
     
     init(viewModel: PlantViewModel) {
@@ -121,68 +119,15 @@ struct SettingsView: View {
                 
                 Section(header: Text("Notifications")) {
                     DatePicker(
-                        "Notification Time",
+                        "Daily Message Time",
                         selection: $notificationTime,
                         displayedComponents: .hourAndMinute
                     )
-                    .datePickerStyle(.wheel)
+                    .datePickerStyle(.compact)
                     
-                    Text("You'll receive plant care reminders at this time each day.")
+                    Text("You'll receive daily messages from your plants at this time.")
                         .font(.caption)
                         .foregroundColor(.secondary)
-                    
-                    // Notification status
-                    HStack {
-                        Image(systemName: notificationStatus.contains("✅") ? "checkmark.circle.fill" : "exclamationmark.triangle.fill")
-                            .foregroundColor(notificationStatus.contains("✅") ? .green : .orange)
-                        Text(notificationStatus)
-                            .font(.caption)
-                    }
-                    .padding(.vertical, 4)
-                    
-                    // Test notification button
-                    Button(action: {
-                        Task {
-                            // Check permissions first
-                            let status = await NotificationService.shared.checkAuthorizationStatus()
-                            if status != .authorized {
-                                showingPermissionAlert = true
-                                await updateNotificationStatus()
-                            } else {
-                                // Send test notifications (this will also generate daily messages)
-                                await NotificationService.shared.sendTestNotificationsForAll(plants: viewModel.plants, viewModel: viewModel)
-                                // Note: Notifications may not appear if app is in foreground
-                                // Try putting app in background or lock screen to see them
-                            }
-                        }
-                    }) {
-                        HStack {
-                            Image(systemName: "bell.badge")
-                            Text("Test Notifications Now")
-                        }
-                        .font(.subheadline)
-                        .foregroundColor(.blue)
-                    }
-                    
-                    Text("💡 Tip: Put the app in background or lock your device to see notifications")
-                        .font(.caption2)
-                        .foregroundColor(.secondary)
-                        .padding(.top, 4)
-                }
-                .onAppear {
-                    Task {
-                        await updateNotificationStatus()
-                    }
-                }
-                .alert("Notification Permissions Required", isPresented: $showingPermissionAlert) {
-                    Button("Open Settings") {
-                        if let url = URL(string: UIApplication.openSettingsURLString) {
-                            UIApplication.shared.open(url)
-                        }
-                    }
-                    Button("Cancel", role: .cancel) { }
-                } message: {
-                    Text("Please enable notifications in iOS Settings > RootMate > Notifications to receive plant reminders.")
                 }
             }
             .navigationTitle("Settings")
@@ -262,28 +207,6 @@ struct SettingsView: View {
         // Schedule notifications for all plants at the new time
         NotificationService.shared.scheduleNotifications(for: viewModel.plants, at: notificationTime, viewModel: viewModel)
         
-        // Update status
-        Task {
-            await updateNotificationStatus()
-        }
-    }
-    
-    private func updateNotificationStatus() async {
-        let status = await NotificationService.shared.checkAuthorizationStatus()
-        switch status {
-        case .authorized:
-            notificationStatus = "✅ Notifications enabled"
-        case .denied:
-            notificationStatus = "❌ Notifications denied - Enable in Settings"
-        case .notDetermined:
-            notificationStatus = "⚠️ Permissions not requested yet"
-        case .provisional:
-            notificationStatus = "⚠️ Provisional - Limited notifications"
-        case .ephemeral:
-            notificationStatus = "⚠️ Ephemeral - Temporary access"
-        @unknown default:
-            notificationStatus = "❓ Unknown status"
-        }
     }
 }
 

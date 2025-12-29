@@ -21,8 +21,15 @@ Before you begin, make sure you have:
    - Visit: https://developer.apple.com/programs/
    - Click "Enroll" button
 
+   **⚠️ If the "Enroll" button just refreshes the page:**
+   - **RECOMMENDED:** Use the "Apple Developer" app on your iPhone, iPad, or Mac instead
+   - Download from App Store/Mac App Store, then enroll through the app
+   - This is Apple's preferred method and more reliable
+   - See `ENROLLMENT_TROUBLESHOOTING.md` for more solutions
+
 2. **Sign in with your Apple ID:**
    - Use the same Apple ID you use for iCloud, App Store purchases, etc.
+   - **Important:** Use an email-based Apple ID (not phone number)
    - If you don't have one, create it at appleid.apple.com first
 
 3. **Complete enrollment:**
@@ -53,14 +60,18 @@ Before submitting, you need these assets ready:
    - **Action:** Make sure you have a 1024x1024 icon in the AppIcon set
 
 2. **App Screenshots:**
-   - **iPhone 6.7" Display (iPhone 14 Pro Max, 15 Pro Max):**
+   - **iPhone 6.7" Display (REQUIRED):**
      - Required: At least 1 screenshot
      - Recommended: 3-5 screenshots
-     - Size: 1290 x 2796 pixels
-   - **iPhone 6.5" Display (iPhone 11 Pro Max, XS Max):**
+     - Size: **1284 x 2778 pixels** (or 1242 x 2688 pixels for 6.5" display)
+     - **Note:** App Store Connect accepts: 1242×2688, 1284×2778 (portrait) or their landscape equivalents
+     - **Note:** If your simulator only shows iPhone 6.5" Display, you can resize screenshots using the script in `App Store Assets/Screenshots/resize_to_6.7_inch.sh`
+   - **iPhone 6.5" Display (optional):**
      - Size: 1242 x 2688 pixels
-   - **iPhone 5.5" Display (iPhone 8 Plus):**
+     - Apple can auto-generate these from your 6.7" screenshots
+   - **iPhone 5.5" Display (optional):**
      - Size: 1242 x 2208 pixels
+     - Apple can auto-generate these from your 6.7" screenshots
    - Format: PNG or JPEG
    - **Tip:** Take screenshots on a real device or simulator showing your app's key features
 
@@ -111,6 +122,13 @@ Before submitting, you need these assets ready:
      - Click "Add Account..."
      - Sign in with your Apple ID
      - Wait for Xcode to fetch your developer account
+
+   **⚠️ If you see "Your team has no devices" error:**
+   - **This is normal for first-time setup!** You don't need a physical device for App Store builds
+   - **Option 1 (Recommended):** Ignore the warning for now - you can still create App Store builds
+   - **Option 2:** Add a device (see troubleshooting section below)
+   - **Option 3:** Select "Any iOS Device" as your build destination (top toolbar) - this works for App Store builds
+   - The error won't prevent you from archiving and uploading to App Store Connect
 
 5. **Verify Bundle Identifier:**
    - Should be: `com.rootmate.RootMate`
@@ -232,9 +250,10 @@ Now you'll fill in all the details about your app.
 ### 6.1 Screenshots
 
 1. In "Prepare for Submission", scroll to **"Screenshots"**
-2. **For iPhone 6.7" Display:**
+2. **For iPhone 6.7" Display (REQUIRED):**
    - Click the screenshot area
-   - Upload your screenshots (1290 x 2796 pixels)
+   - Upload your screenshots (**1284 x 2778 pixels** or 1242 x 2688 pixels)
+   - **If your screenshots are a different size:** Use the resize script in `App Store Assets/Screenshots/resize_to_6.7_inch.sh` to convert them
    - Add 3-5 screenshots showing key features
    - Drag to reorder (first one is most important)
 
@@ -321,8 +340,13 @@ Now you'll create a build to upload to App Store Connect.
 
 ### 7.2 Create Archive
 
-1. Select **"Product"** → **"Archive"**
-2. Xcode will:
+1. **Before archiving, ensure:**
+   - **"Any iOS Device"** is selected as build destination (top toolbar)
+   - Your project is using **Release** configuration for Archive (this is default)
+   - Automatic signing is enabled for the **Release** configuration
+
+2. Select **"Product"** → **"Archive"**
+3. Xcode will:
    - Build your app
    - Create an archive
    - Open the Organizer window
@@ -331,6 +355,71 @@ Now you'll create a build to upload to App Store Connect.
 - Fix any code errors
 - Make sure signing is configured correctly
 - Check that all dependencies are resolved
+
+**⚠️ If you get "Your team has no devices" error during archive:**
+
+This happens because Xcode tries to validate signing for all configurations. Here's how to fix it:
+
+**Solution 1: Configure Signing for Release Only (Recommended for App Store)**
+
+1. In Xcode, select your project → "RootMate" target
+2. Go to **"Signing & Capabilities"** tab
+3. You'll see signing settings for both **Debug** and **Release** configurations
+4. **For Debug configuration:**
+   - You can either:
+     - **Option A:** Uncheck "Automatically manage signing" for Debug (if you're only doing App Store builds)
+     - **Option B:** Keep it checked but ignore the warning (it won't affect Release/Archive)
+5. **For Release configuration:**
+   - ✅ Make sure "Automatically manage signing" is **checked**
+   - ✅ Select your Team
+   - This is what matters for App Store builds
+
+6. Try archiving again (Product → Archive)
+
+**Solution 2: Add a Device (Quick Fix)**
+
+If you have an iPhone/iPad available:
+1. Connect your device via USB
+2. Unlock device and trust the computer
+3. In Xcode: Window → Devices and Simulators (Shift+Cmd+2)
+4. Your device will be registered automatically
+5. Try archiving again
+
+**Solution 3: Use Command Line Archive (Bypasses Some Checks)**
+
+If the GUI keeps failing, you can archive via command line:
+
+**Important:** The project file has `CODE_SIGN_STYLE = Manual` which disables automatic signing. Use the `-allowProvisioningUpdates` flag to enable it during build.
+
+1. Open Terminal
+2. Navigate to your project directory:
+   ```bash
+   cd "/Users/janetbalneaves/Documents/Cursor Projects/RootMate"
+   ```
+3. Run the archive command with automatic signing enabled:
+   ```bash
+   xcodebuild -project RootMate.xcodeproj \
+     -scheme RootMate \
+     -configuration Release \
+     -destination 'generic/platform=iOS' \
+     -archivePath ./build/RootMate.xcarchive \
+     -allowProvisioningUpdates \
+     CODE_SIGN_STYLE=Automatic \
+     DEVELOPMENT_TEAM=QJANRR5HKM \
+     archive
+   ```
+4. This creates the archive at `./build/RootMate.xcarchive`
+5. Open Xcode → Window → Organizer
+6. The archive should appear there
+7. Click "Distribute App" to upload to App Store Connect
+
+**Note:** Replace `QJANRR5HKM` with your actual team ID if different. You can find it in Xcode → Settings → Accounts → Select your team → Team ID.
+
+**Why this happens:**
+- Xcode validates signing for both Debug and Release configurations
+- Development profiles (for Debug) require registered devices
+- App Store Distribution profiles (for Release/Archive) don't require devices
+- The error appears because Xcode can't create Development profiles, but this doesn't prevent App Store builds
 
 ### 7.3 Validate Archive
 
@@ -524,6 +613,154 @@ Use this checklist to track your progress:
 
 ## Troubleshooting Common Issues
 
+### "Your team has no devices" Error
+
+**This error appears when setting up signing for the first time.**
+
+**✅ IMPORTANT: You don't need a physical device for App Store builds!** This warning will NOT prevent you from creating App Store builds or uploading to App Store Connect.
+
+**Quick Fix (Recommended):**
+
+1. **In Xcode, change the build destination:**
+   - Look at the top toolbar in Xcode
+   - Click on the device selector (currently might say "RootMate > iPhone 15 Pro" or similar)
+   - Select **"Any iOS Device"** from the dropdown
+   - This tells Xcode you're building for App Store distribution, not a specific device
+
+2. **Continue with automatic signing:**
+   - Make sure "Automatically manage signing" is still checked
+   - The warning may still appear, but you can ignore it
+   - Xcode will create App Store Distribution profiles automatically (these don't require devices)
+
+3. **Proceed to archive:**
+   - Product → Archive
+   - This will work even with the "no devices" warning
+   - The archive is for App Store distribution, not device testing
+
+**Why this works:**
+- App Store Distribution provisioning profiles don't require registered devices
+- Development profiles require devices, but you're not using those for App Store builds
+- The warning is just Xcode being cautious about development profiles
+
+**Option 2: Add a Device (Optional - Only if you want to test on a device)**
+
+If you want to register a device for testing (not required for App Store submission):
+
+1. **If you have an iPhone/iPad:**
+   - Connect your device to your Mac via USB
+   - Unlock your device and trust the computer (tap "Trust" when prompted)
+   - In Xcode: Window → Devices and Simulators (Shift+Cmd+2)
+   - Your device should appear - Xcode will register it automatically
+   - The warning should disappear after this
+
+2. **Or manually add device:**
+   - Go to: https://developer.apple.com/account/resources/devices/list
+   - Click the **"+"** button
+   - Select "Register a New Device"
+   - Choose device type (iPhone, iPad, etc.)
+   - Enter device name (e.g., "Janet's iPhone")
+   - Enter UDID (see below for how to find it)
+   - Click "Continue" → "Register"
+
+   **To find UDID:**
+   - **On Mac (if device connected):** Open Finder, select your device in sidebar, click on "Serial Number" text to reveal UDID
+   - **On iPhone:** Settings → General → About → scroll to find UDID
+   - **On Windows:** Use iTunes (if available) or 3uTools
+
+**Option 3: Dismiss the Warning (Easiest)**
+
+- Simply click "OK" or "Cancel" on the warning dialog
+- Select "Any iOS Device" as your build destination
+- Continue with your App Store build process
+- The warning won't affect App Store distribution
+
+**Bottom line:** 
+- ✅ You can safely ignore this error for App Store builds
+- ✅ Select "Any iOS Device" as your build destination
+- ✅ Continue with archiving and uploading to App Store Connect
+- ✅ The warning is about development profiles, not App Store distribution profiles
+
+### "Communication with Apple failed: Your team has no devices" (During Archive)
+
+**This error appears when trying to Archive and Xcode is attempting to create Development provisioning profiles.**
+
+**Why this happens:**
+- Xcode validates signing for both Debug and Release configurations before archiving
+- Development profiles (for Debug builds) require registered devices
+- App Store Distribution profiles (for Release/Archive) don't require devices
+- Xcode fails when it can't create Development profiles, even though you don't need them for App Store builds
+
+**Solution 1: Disable Automatic Signing for Debug (Recommended)**
+
+This tells Xcode to only manage signing for Release builds (which are used for App Store):
+
+1. In Xcode, select your project (blue icon) → "RootMate" target
+2. Go to **"Signing & Capabilities"** tab
+3. At the top, you'll see a dropdown for **"Debug"** and **"Release"** configurations
+4. Select **"Debug"** from the dropdown
+5. **Uncheck** "Automatically manage signing" for Debug
+6. Select **"Release"** from the dropdown
+7. **Make sure** "Automatically manage signing" is **checked** for Release
+8. Select your Team for Release
+9. Try archiving again: Product → Archive
+
+**Solution 2: Add a Device (Quick Fix)**
+
+If you have an iPhone/iPad:
+1. Connect device via USB to your Mac
+2. Unlock device and tap "Trust" when prompted
+3. In Xcode: Window → Devices and Simulators (Shift+Cmd+2)
+4. Your device should appear - Xcode registers it automatically
+5. Try archiving again
+
+**Solution 3: Use Command Line Archive (Bypass GUI Issues)**
+
+If Xcode GUI keeps failing, archive via Terminal:
+
+**Important:** Your project has `CODE_SIGN_STYLE = Manual` in the project file. Use the `-allowProvisioningUpdates` flag to enable automatic signing during the build.
+
+1. Open Terminal
+2. Navigate to your project directory:
+   ```bash
+   cd "/Users/janetbalneaves/Documents/Cursor Projects/RootMate"
+   ```
+3. Run the archive command with automatic signing:
+   ```bash
+   xcodebuild -project RootMate.xcodeproj \
+     -scheme RootMate \
+     -configuration Release \
+     -destination 'generic/platform=iOS' \
+     -archivePath ./build/RootMate.xcarchive \
+     -allowProvisioningUpdates \
+     CODE_SIGN_STYLE=Automatic \
+     DEVELOPMENT_TEAM=QJANRR5HKM \
+     archive
+   ```
+4. This creates the archive at `./build/RootMate.xcarchive`
+5. Open Xcode → Window → Organizer
+6. The archive should appear there
+7. You can then click "Distribute App" to upload to App Store Connect
+
+**Note:** Replace `QJANRR5HKM` with your actual team ID if different. Find it in Xcode → Settings → Accounts → Select your team → Team ID.
+
+**Solution 4: Configure Build Settings (Advanced)**
+
+If the above don't work, you can modify build settings:
+
+1. Select project → "RootMate" target → **"Build Settings"** tab
+2. Search for "Code Signing Style"
+3. For **Debug** configuration, set to "Manual" (or leave empty)
+4. For **Release** configuration, set to "Automatic"
+5. Search for "Development Team"
+6. Make sure your team (QJANRR5HKM) is set for **Release** configuration
+7. Try archiving again
+
+**Important Notes:**
+- ✅ App Store Distribution profiles don't require devices
+- ✅ You only need devices for Development profiles (used for testing on devices)
+- ✅ For App Store submission, you only need Release configuration signing
+- ✅ The error is about Development profiles, not Distribution profiles
+
 ### "No accounts with App Store Connect access"
 - Make sure you're signed in with your Apple Developer account
 - Verify your enrollment is active
@@ -533,6 +770,136 @@ Use this checklist to track your progress:
 - Create the Bundle ID in developer.apple.com first
 - Wait a few minutes for it to sync
 - Refresh App Store Connect
+
+### "No profiles for 'com.rootmate.RootMate' were found" (Archive Failed)
+
+**This error means Xcode can't find provisioning profiles for your bundle ID when trying to archive.**
+
+**⚠️ CRITICAL: The bundle ID must exist in your Apple Developer account BEFORE Xcode can create profiles.**
+
+**Step-by-Step Fix:**
+
+#### Step 1: Create the Bundle ID (MOST IMPORTANT - Do this first!)
+
+1. **Go to Apple Developer Portal:**
+   - Visit: https://developer.apple.com/account/resources/identifiers/list
+   - Sign in with your Apple Developer account
+
+2. **Check if Bundle ID exists:**
+   - Look for `com.rootmate.RootMate` in the list
+   - If it's NOT there, continue to create it
+
+3. **Create the Bundle ID:**
+   - Click the **"+"** button (top left)
+   - Select **"App IDs"** → Click **"Continue"**
+   - Select **"App"** → Click **"Continue"**
+   - Fill in:
+     - **Description:** `RootMate App` (or any description)
+     - **Bundle ID:** Select **"Explicit"**
+     - **Bundle ID field:** Enter `com.rootmate.RootMate` (exactly as shown)
+   - **Enable Capabilities** (scroll down and check what you need):
+     - ✅ Push Notifications (if your app uses notifications)
+     - ✅ Associated Domains (if you use deep links)
+     - ✅ Background Modes (if your app runs in background)
+   - Click **"Continue"**
+   - Review the summary → Click **"Register"**
+   - Wait for confirmation
+
+4. **Wait for sync:**
+   - Wait 2-5 minutes for Apple's servers to sync
+   - The bundle ID needs to be available to Xcode
+
+#### Step 2: Configure Xcode Signing
+
+1. **Open Xcode and your project**
+
+2. **Select the project:**
+   - Click the blue project icon at the top of the navigator
+   - Select the **"RootMate"** target (under TARGETS)
+
+3. **Go to Signing & Capabilities tab**
+
+4. **Enable Automatic Signing:**
+   - ✅ Check **"Automatically manage signing"**
+   - Select your **Team** from the dropdown
+   - If you don't see your team:
+     - Click **"Add Account..."**
+     - Sign in with your Apple Developer Apple ID
+     - Wait for Xcode to fetch your account
+     - Select your team from the dropdown
+
+5. **Verify Bundle Identifier:**
+   - Should show: `com.rootmate.RootMate`
+   - If it's different, change it to match exactly
+
+6. **Check for errors:**
+   - You might see a yellow warning about "no devices" - that's OK, ignore it
+   - If you see a red error about the bundle ID, the bundle ID might not be synced yet (wait a few more minutes)
+
+#### Step 3: Set Build Destination for Archive
+
+1. **In Xcode's top toolbar:**
+   - Click the device selector (shows current device/simulator)
+   - Select **"Any iOS Device"** from the dropdown
+   - This is critical for App Store builds
+
+#### Step 4: Refresh Xcode's Connection to Apple Developer
+
+1. **Refresh accounts:**
+   - Xcode → Settings (or Preferences) → **Accounts** tab
+   - Select your Apple ID
+   - Click **"Download Manual Profiles"** (if the button is available)
+   - Or click **"Manage Certificates..."** to verify certificates exist
+
+2. **If automatic signing still shows errors:**
+   - In Signing & Capabilities, **uncheck** "Automatically manage signing"
+   - Wait 5 seconds
+   - **Check** it again
+   - Select your Team again
+   - This forces Xcode to refresh and create new profiles
+
+#### Step 5: Clean and Try Archive Again
+
+1. **Clean build folder:**
+   - Product → Clean Build Folder (Shift+Cmd+K)
+   - Or: Product → Clean (Cmd+Shift+K)
+
+2. **Close and reopen Xcode** (optional but sometimes helps)
+
+3. **Try archiving again:**
+   - Make sure **"Any iOS Device"** is selected
+   - Product → Archive
+   - Xcode should now be able to create the App Store Distribution profile automatically
+
+#### Step 6: If Still Not Working
+
+**Verify your Apple Developer account:**
+- Make sure you're enrolled in the Apple Developer Program ($99/year)
+- Check enrollment status: https://developer.apple.com/account/
+- Status should show "Active"
+
+**Sign out and back in:**
+- Xcode → Settings → Accounts
+- Select your Apple ID → Click **"-"** to remove
+- Click **"+"** → Add Apple ID → Sign in again
+- Go back to Signing & Capabilities and select your team
+
+**Check for certificate issues:**
+- Xcode → Settings → Accounts
+- Select your Apple ID → Click **"Manage Certificates..."**
+- You should see certificates listed
+- If empty, Xcode will create them automatically when you archive
+
+**Manual verification:**
+- Go to: https://developer.apple.com/account/resources/profiles/list
+- Check if any profiles exist for `com.rootmate.RootMate`
+- If profiles exist but Xcode can't see them, try the refresh steps above
+
+**Note:** For App Store builds, Xcode needs to create an **App Store Distribution** provisioning profile. This happens automatically when:
+- ✅ Bundle ID exists in Apple Developer
+- ✅ Automatic signing is enabled
+- ✅ Team is selected
+- ✅ "Any iOS Device" is selected as build destination
 
 ### "Invalid provisioning profile"
 - Make sure "Automatically manage signing" is checked

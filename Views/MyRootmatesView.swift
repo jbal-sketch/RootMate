@@ -17,6 +17,9 @@ struct MyRootmatesView: View {
     @State private var selectedPlantId: UUID?
     @State private var showingSubscriptionAlert = false
     @State private var subscriptionAlertMessage = ""
+    @State private var isEditMode = false
+    @State private var showingDeleteConfirmation = false
+    @State private var plantToDelete: Plant?
     
     var body: some View {
         NavigationView {
@@ -51,12 +54,25 @@ struct MyRootmatesView: View {
             .navigationBarTitleDisplayMode(.large)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button(action: {
-                        showingSettings = true
-                    }) {
-                        Image(systemName: "gearshape.fill")
-                            .font(.title2)
-                            .foregroundColor(Color(hex: "1B4332"))
+                    HStack(spacing: 16) {
+                        Button(action: {
+                            showingSettings = true
+                        }) {
+                            Image(systemName: "gearshape.fill")
+                                .font(.title2)
+                                .foregroundColor(Color(hex: "1B4332"))
+                        }
+                        
+                        if !viewModel.plants.isEmpty {
+                            Button(action: {
+                                withAnimation {
+                                    isEditMode.toggle()
+                                }
+                            }) {
+                                Text(isEditMode ? "Done" : "Edit")
+                                    .foregroundColor(Color(hex: "1B4332"))
+                            }
+                        }
                     }
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
@@ -129,8 +145,13 @@ struct MyRootmatesView: View {
                 // Schedule notifications on app appear
                 scheduleNotificationsIfNeeded()
                 
-                // Generate daily messages if it's past notification time
+                // Generate initial welcome message for first-time users
                 let viewModelRef = viewModel
+                Task { @MainActor in
+                    await viewModelRef.generateInitialMessageIfNeeded()
+                }
+                
+                // Generate daily messages if it's past notification time
                 Task { @MainActor in
                     await viewModelRef.generateDailyMessagesIfNeeded()
                 }
@@ -226,7 +247,7 @@ struct MyRootmatesView: View {
                 VStack(alignment: .leading) {
                     Text("Total Rootmates")
                         .font(.subheadline)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(Color(hex: "5C6B5E")) // Dark gray-green for visibility
                     Text("\(viewModel.plants.count)")
                         .font(.system(size: 32, weight: .bold))
                         .foregroundColor(Color(hex: "1B4332"))
@@ -237,14 +258,14 @@ struct MyRootmatesView: View {
                 VStack(alignment: .trailing) {
                     Text("Hydrated")
                         .font(.subheadline)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(Color(hex: "5C6B5E")) // Dark gray-green for visibility
                     Text("\(hydratedCount)")
                         .font(.system(size: 32, weight: .bold))
-                        .foregroundColor(.green)
+                        .foregroundColor(Color(hex: "2E7D32")) // Darker green for better contrast
                 }
             }
             .padding()
-            .background(Color.white.opacity(0.8))
+            .background(Color.white)
             .cornerRadius(16)
             .shadow(color: .black.opacity(0.1), radius: 8, x: 0, y: 2)
         }
@@ -263,8 +284,52 @@ struct MyRootmatesView: View {
                 emptyStateView
             } else {
                 ForEach(viewModel.plants) { plant in
-                    RootmateCard(plant: plant, viewModel: viewModel)
+                    HStack(spacing: 12) {
+                        // Delete button in edit mode
+                        if isEditMode {
+                            Button(action: {
+                                plantToDelete = plant
+                                showingDeleteConfirmation = true
+                            }) {
+                                Image(systemName: "minus.circle.fill")
+                                    .font(.title2)
+                                    .foregroundColor(.red)
+                            }
+                            .transition(.scale.combined(with: .opacity))
+                        }
+                        
+                        RootmateCard(plant: plant, viewModel: viewModel)
+                            .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                                Button(role: .destructive) {
+                                    plantToDelete = plant
+                                    showingDeleteConfirmation = true
+                                } label: {
+                                    Label("Delete", systemImage: "trash")
+                                }
+                            }
+                    }
                 }
+            }
+        }
+        .alert("Delete Plant", isPresented: $showingDeleteConfirmation) {
+            Button("Cancel", role: .cancel) {
+                plantToDelete = nil
+            }
+            Button("Delete", role: .destructive) {
+                if let plant = plantToDelete {
+                    withAnimation {
+                        viewModel.deletePlant(plant.id)
+                    }
+                    plantToDelete = nil
+                    // Exit edit mode if no plants left
+                    if viewModel.plants.isEmpty {
+                        isEditMode = false
+                    }
+                }
+            }
+        } message: {
+            if let plant = plantToDelete {
+                Text("Are you sure you want to delete \(plant.nickname)? This action cannot be undone.")
             }
         }
     }
@@ -566,8 +631,13 @@ struct PlantDetailView: View {
                         // Header
                         VStack(alignment: .leading, spacing: 8) {
                             HStack {
-                                Text(plant.vibe.emoji)
-                                    .font(.system(size: 50))
+                                ZStack(alignment: .bottomTrailing) {
+                                    Text(PlantSpecies.emoji(for: plant.species))
+                                        .font(.system(size: 50))
+                                    Text(plant.vibe.emoji)
+                                        .font(.system(size: 20))
+                                        .offset(x: 4, y: 4)
+                                }
                                 VStack(alignment: .leading) {
                                     Text(plant.nickname)
                                         .font(.largeTitle)
@@ -575,14 +645,9 @@ struct PlantDetailView: View {
                                         .foregroundColor(Color(hex: "1B4332"))
                                     Text(plant.species)
                                         .font(.title3)
-                                        .foregroundColor(.secondary)
+                                        .foregroundColor(Color(hex: "5C6B5E"))
                                 }
                             }
-                            
-                            Text(plant.vibe.rawValue)
-                                .font(.subheadline)
-                                .foregroundColor(.secondary)
-                                .italic()
                         }
                         .padding()
                         .frame(maxWidth: .infinity, alignment: .leading)
@@ -700,26 +765,63 @@ struct PlantDetailView: View {
                 .font(.headline)
                 .foregroundColor(Color(hex: "1B4332"))
             
-            HStack {
-                Text(plant.status.emoji)
-                    .font(.title)
-                Text(plant.status.rawValue)
-                    .font(.title3)
-                    .fontWeight(.semibold)
-                Spacer()
+            VStack(alignment: .leading, spacing: 8) {
+                HStack {
+                    Text(plant.status.emoji)
+                        .font(.title)
+                    Text(plant.status.rawValue)
+                        .font(.title3)
+                        .fontWeight(.semibold)
+                    Spacer()
+                }
+                
+                Divider()
+                
+                if let lastWatered = plant.lastWatered {
+                    HStack(spacing: 8) {
+                        Image(systemName: "drop.fill")
+                            .foregroundColor(.blue)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Last Watered")
+                                .font(.caption)
+                                .foregroundColor(Color(hex: "5C6B5E"))
+                            Text(formatDateTime(lastWatered))
+                                .font(.subheadline)
+                                .fontWeight(.medium)
+                                .foregroundColor(Color(hex: "1B4332"))
+                        }
+                        Spacer()
+                        
+                        let daysSince = Calendar.current.dateComponents([.day], from: lastWatered, to: Date()).day ?? 0
+                        Text("\(daysSince) day\(daysSince == 1 ? "" : "s") ago")
+                            .font(.caption)
+                            .foregroundColor(Color(hex: "5C6B5E"))
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 4)
+                            .background(Color(hex: "E8F5E9"))
+                            .cornerRadius(8)
+                    }
+                } else {
+                    HStack(spacing: 8) {
+                        Image(systemName: "drop")
+                            .foregroundColor(.orange)
+                        Text("Never watered yet")
+                            .font(.subheadline)
+                            .foregroundColor(.orange)
+                    }
+                }
             }
             .padding()
             .background(Color.white.opacity(0.8))
             .cornerRadius(12)
-            
-            if let lastWatered = plant.lastWatered {
-                let daysSince = Calendar.current.dateComponents([.day], from: lastWatered, to: Date()).day ?? 0
-                Text("Last watered \(daysSince) day\(daysSince == 1 ? "" : "s") ago")
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
-                    .padding(.leading)
-            }
         }
+    }
+    
+    private func formatDateTime(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .medium
+        formatter.timeStyle = .short
+        return formatter.string(from: date)
     }
     
     private func actionButtons(plant: Plant, showingQRCode: Binding<Bool>) -> some View {
@@ -814,8 +916,8 @@ struct AddPlantView: View {
     @ObservedObject var viewModel: PlantViewModel
     @Environment(\.dismiss) var dismiss
     @State private var nickname = ""
-    @State private var selectedSpecies = "Fiddle Leaf Fig"
-    @State private var selectedVibe: PlantVibe = .dramaQueen
+    @State private var selectedSpecies = "Monstera Deliciosa"
+    @State private var selectedVibe: PlantVibe = .chillRoomie
     var onPlantAdded: ((Plant) -> Void)?
     
     var body: some View {
@@ -823,45 +925,69 @@ struct AddPlantView: View {
             Form {
                 Section("Plant Details") {
                     TextField("Nickname", text: $nickname)
-                    HStack {
+                    
+                    VStack(alignment: .leading, spacing: 8) {
                         Text("Species")
-                        Spacer()
-                        Picker("", selection: $selectedSpecies) {
+                            .font(.subheadline)
+                            .foregroundColor(Color(hex: "5C6B5E"))
+                        
+                        Menu {
                             ForEach(PlantSpecies.commonSpecies, id: \.self) { species in
-                                HStack {
-                                    Text(PlantSpecies.emoji(for: species))
-                                    Text(species)
+                                Button(action: {
+                                    selectedSpecies = species
+                                }) {
+                                    Label {
+                                        Text(species)
+                                    } icon: {
+                                        Text(PlantSpecies.emoji(for: species))
+                                    }
                                 }
-                                .tag(species)
                             }
+                        } label: {
+                            HStack {
+                                Text(PlantSpecies.emoji(for: selectedSpecies))
+                                    .font(.title3)
+                                Text(selectedSpecies)
+                                    .foregroundColor(.primary)
+                                Spacer()
+                                Image(systemName: "chevron.up.chevron.down")
+                                    .font(.caption)
+                                    .foregroundColor(Color(hex: "5C6B5E"))
+                            }
+                            .padding(.vertical, 4)
                         }
-                        .pickerStyle(.menu)
-                        .labelsHidden()
                     }
-                    HStack {
-                        Text("Selected: \(PlantSpecies.emoji(for: selectedSpecies)) \(selectedSpecies)")
-                            .foregroundColor(.secondary)
-                            .font(.caption)
-                    }
-                    HStack {
+                    
+                    VStack(alignment: .leading, spacing: 8) {
                         Text("Vibe")
-                        Spacer()
-                        Picker("", selection: $selectedVibe) {
+                            .font(.subheadline)
+                            .foregroundColor(Color(hex: "5C6B5E"))
+                        
+                        Menu {
                             ForEach(PlantVibe.allCases, id: \.self) { vibe in
-                                HStack {
-                                    Text(vibe.emoji)
-                                    Text(vibe.rawValue)
+                                Button(action: {
+                                    selectedVibe = vibe
+                                }) {
+                                    Label {
+                                        Text(vibe.rawValue)
+                                    } icon: {
+                                        Text(vibe.emoji)
+                                    }
                                 }
-                                .tag(vibe)
                             }
+                        } label: {
+                            HStack {
+                                Text(selectedVibe.emoji)
+                                    .font(.title3)
+                                Text(selectedVibe.rawValue)
+                                    .foregroundColor(.primary)
+                                Spacer()
+                                Image(systemName: "chevron.up.chevron.down")
+                                    .font(.caption)
+                                    .foregroundColor(Color(hex: "5C6B5E"))
+                            }
+                            .padding(.vertical, 4)
                         }
-                        .pickerStyle(.menu)
-                        .labelsHidden()
-                    }
-                    HStack {
-                        Text("Selected: \(selectedVibe.emoji) \(selectedVibe.rawValue)")
-                            .foregroundColor(.secondary)
-                            .font(.caption)
                     }
                 }
             }
@@ -924,68 +1050,69 @@ struct EditPlantView: View {
             Form {
                 Section("Plant Details") {
                     TextField("Nickname", text: $nickname)
+                    
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Species")
                             .font(.subheadline)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(Color(hex: "5C6B5E"))
                         
                         Menu {
                             ForEach(PlantSpecies.commonSpecies, id: \.self) { species in
                                 Button(action: {
                                     selectedSpecies = species
                                 }) {
-                                    HStack {
-                                        Text(PlantSpecies.emoji(for: species))
+                                    Label {
                                         Text(species)
+                                    } icon: {
+                                        Text(PlantSpecies.emoji(for: species))
                                     }
                                 }
                             }
                         } label: {
                             HStack {
                                 Text(PlantSpecies.emoji(for: selectedSpecies))
+                                    .font(.title3)
                                 Text(selectedSpecies)
+                                    .foregroundColor(.primary)
                                 Spacer()
-                                Image(systemName: "chevron.down")
+                                Image(systemName: "chevron.up.chevron.down")
                                     .font(.caption)
-                                    .foregroundColor(.secondary)
+                                    .foregroundColor(Color(hex: "5C6B5E"))
                             }
+                            .padding(.vertical, 4)
                         }
-                        
-                        Text("Selected: \(PlantSpecies.emoji(for: selectedSpecies)) \(selectedSpecies)")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
                     }
                     
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Vibe")
                             .font(.subheadline)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(Color(hex: "5C6B5E"))
                         
                         Menu {
                             ForEach(PlantVibe.allCases, id: \.self) { vibe in
                                 Button(action: {
                                     selectedVibe = vibe
                                 }) {
-                                    HStack {
-                                        Text(vibe.emoji)
+                                    Label {
                                         Text(vibe.rawValue)
+                                    } icon: {
+                                        Text(vibe.emoji)
                                     }
                                 }
                             }
                         } label: {
                             HStack {
                                 Text(selectedVibe.emoji)
+                                    .font(.title3)
                                 Text(selectedVibe.rawValue)
+                                    .foregroundColor(.primary)
                                 Spacer()
-                                Image(systemName: "chevron.down")
+                                Image(systemName: "chevron.up.chevron.down")
                                     .font(.caption)
-                                    .foregroundColor(.secondary)
+                                    .foregroundColor(Color(hex: "5C6B5E"))
                             }
+                            .padding(.vertical, 4)
                         }
-                        
-                        Text("Selected: \(selectedVibe.emoji) \(selectedVibe.rawValue)")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
                     }
                 }
             }

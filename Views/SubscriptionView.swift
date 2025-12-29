@@ -14,6 +14,7 @@ struct SubscriptionView: View {
     @State private var product: Product?
     @State private var isLoadingProduct = false
     @State private var purchaseInProgress = false
+    @State private var errorMessage: String?
     
     var body: some View {
         NavigationView {
@@ -81,23 +82,31 @@ struct SubscriptionView: View {
                     }
                     
                     // Error message
-                    if let errorMessage = subscriptionService.errorMessage {
+                    if let errorMessage = errorMessage ?? subscriptionService.errorMessage {
                         Text(errorMessage)
                             .font(.caption)
                             .foregroundColor(.red)
                             .padding()
+                            .multilineTextAlignment(.center)
                     }
                     
                     // Subscribe button
                     Button(action: {
                         Task {
                             purchaseInProgress = true
+                            errorMessage = nil
                             do {
                                 let success = try await subscriptionService.purchase()
                                 if success {
                                     dismiss()
+                                } else {
+                                    // User cancelled or purchase pending
+                                    if subscriptionService.errorMessage == nil {
+                                        errorMessage = "Purchase was cancelled or is pending approval"
+                                    }
                                 }
                             } catch {
+                                errorMessage = error.localizedDescription
                                 print("Purchase error: \(error)")
                             }
                             purchaseInProgress = false
@@ -108,17 +117,17 @@ struct SubscriptionView: View {
                                 ProgressView()
                                     .progressViewStyle(CircularProgressViewStyle(tint: .white))
                             } else {
-                                Text("Start Free Trial")
+                                Text(product == nil ? "Loading..." : "Start Free Trial")
                                     .fontWeight(.semibold)
                             }
                         }
                         .frame(maxWidth: .infinity)
                         .padding()
-                        .background(Color(hex: "1B4332"))
+                        .background(product == nil ? Color.gray : Color(hex: "1B4332"))
                         .foregroundColor(.white)
                         .cornerRadius(12)
                     }
-                    .disabled(purchaseInProgress || product == nil)
+                    .disabled(purchaseInProgress || product == nil || isLoadingProduct)
                     .padding(.horizontal)
                     
                     // Terms
@@ -162,9 +171,35 @@ struct SubscriptionView: View {
     
     private func loadProduct() async {
         isLoadingProduct = true
+        errorMessage = nil
         do {
             product = try await subscriptionService.loadProducts()
+            if product == nil {
+                errorMessage = "Unable to load subscription product. Please check your internet connection and try again."
+            }
         } catch {
+            // Provide more helpful error messages
+            if let subscriptionError = error as? SubscriptionError {
+                switch subscriptionError {
+                case .productNotFound:
+                    errorMessage = """
+                    Subscription product not found.
+                    
+                    This usually means:
+                    • The product isn't set up in App Store Connect yet
+                    • The product ID doesn't match: com.rootmate.premium.monthly
+                    • You're testing in the simulator (use a real device or TestFlight)
+                    
+                    See SUBSCRIPTION_SETUP.md for setup instructions.
+                    """
+                case .failedVerification:
+                    errorMessage = "Failed to verify purchase. Please try again."
+                case .purchaseFailed:
+                    errorMessage = "Purchase failed. Please try again."
+                }
+            } else {
+                errorMessage = "Failed to load subscription: \(error.localizedDescription)"
+            }
             print("Failed to load product: \(error)")
         }
         isLoadingProduct = false

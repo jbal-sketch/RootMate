@@ -23,16 +23,42 @@ struct PlantChatView: View {
                 VStack(spacing: 20) {
                     // Plant Header
                     HStack {
-                        Text(plant.vibe.emoji)
-                            .font(.system(size: 40))
-                        VStack(alignment: .leading) {
+                        ZStack(alignment: .bottomTrailing) {
+                            Text(PlantSpecies.emoji(for: plant.species))
+                                .font(.system(size: 40))
+                            Text(plant.vibe.emoji)
+                                .font(.system(size: 16))
+                                .offset(x: 4, y: 4)
+                        }
+                        VStack(alignment: .leading, spacing: 4) {
                             Text(plant.nickname)
                                 .font(.title2)
                                 .fontWeight(.bold)
                                 .foregroundColor(Color(hex: "1B4332"))
                             Text(plant.species)
                                 .font(.subheadline)
-                                .foregroundColor(.secondary)
+                                .foregroundColor(Color(hex: "5C6B5E"))
+                            
+                            // Last watering info
+                            if let lastWatered = plant.lastWatered {
+                                HStack(spacing: 4) {
+                                    Image(systemName: "drop.fill")
+                                        .font(.caption2)
+                                        .foregroundColor(.blue)
+                                    Text("Last watered: \(formatDate(lastWatered))")
+                                        .font(.caption)
+                                        .foregroundColor(Color(hex: "5C6B5E"))
+                                }
+                            } else {
+                                HStack(spacing: 4) {
+                                    Image(systemName: "drop")
+                                        .font(.caption2)
+                                        .foregroundColor(.orange)
+                                    Text("Never watered yet")
+                                        .font(.caption)
+                                        .foregroundColor(.orange)
+                                }
+                            }
                         }
                         Spacer()
                     }
@@ -204,6 +230,13 @@ struct PlantChatView: View {
         }
         
         isLoading = false
+    }
+    
+    private func formatDate(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .medium
+        formatter.timeStyle = .short
+        return formatter.string(from: date)
     }
 }
 

@@ -3,73 +3,69 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 77;
+	objectVersion = 63;
 	objects = {
 
 /* Begin PBXBuildFile section */
 		09E95100E8758422991CCF2A /* RootMateApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35107907A60AF2CF75031C0B /* RootMateApp.swift */; };
+		1234567890123456789012345678 /* AISystemPrompts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78901234567890123456789012 /* AISystemPrompts.swift */; };
+		2345678901234567890123456789 /* QRCodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3456789012345678901234567890 /* QRCodeView.swift */; };
 		28782D99A6DFF527EBE87849 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 43B45A08578403C3D43BD165 /* Assets.xcassets */; };
-		CB4877259F884AFFAF268414 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDD55B34A12702B9E4C65A65 /* ContentView.swift */; };
+		5678901234567890123456789012 /* QRCodeGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4567890123456789012345678901 /* QRCodeGenerator.swift */; };
+		8901234567890123456789012345 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9012345678901234567890123456 /* SettingsView.swift */; };
+		8A1F5914F2574A7D91943D11 /* SubscriptionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A399C042599047E59D19A993 /* SubscriptionService.swift */; };
+		A123456789012345678901234567 /* PlantChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B23456789012345678901234567 /* PlantChatView.swift */; };
 		A1B2C3D4E5F6789012345678 /* Plant.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2C3D4E5F678901234567890 /* Plant.swift */; };
 		B1C2D3E4F5678901234567890 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3D4E5F67890123456789012 /* User.swift */; };
 		C1D2E3F4567890123456789012 /* PlantViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E5F6789012345678901234 /* PlantViewModel.swift */; };
+		C234567890123456789012345678 /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = D345678901234567890123456789 /* NotificationService.swift */; };
+		C871829FBCF5441ABCB2E936 /* SubscriptionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A1BBBE6A96744C2930025A5 /* SubscriptionView.swift */; };
+		CB4877259F884AFFAF268414 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDD55B34A12702B9E4C65A65 /* ContentView.swift */; };
 		D1E2F3456789012345678901234 /* WeatherService.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5F6789012345678901234567 /* WeatherService.swift */; };
 		E1F2345678901234567890123456 /* AIService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6789012345678901234567890 /* AIService.swift */; };
-		F12345678901234567890123456 /* MyRootmatesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67890123456789012345678901 /* MyRootmatesView.swift */; };
-		1234567890123456789012345678 /* AISystemPrompts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78901234567890123456789012 /* AISystemPrompts.swift */; };
-		2345678901234567890123456789 /* QRCodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3456789012345678901234567890 /* QRCodeView.swift */; };
-		C234567890123456789012345678 /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = D345678901234567890123456789 /* NotificationService.swift */; };
 		E234567890123456789012345678 /* APIConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = F345678901234567890123456789 /* APIConfiguration.swift */; };
+		F12345678901234567890123456 /* MyRootmatesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67890123456789012345678901 /* MyRootmatesView.swift */; };
 		H567890123456789012345678901 /* KeychainService.swift in Sources */ = {isa = PBXBuildFile; fileRef = G456789012345678901234567890 /* KeychainService.swift */; };
-		5678901234567890123456789012 /* QRCodeGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4567890123456789012345678901 /* QRCodeGenerator.swift */; };
-		8901234567890123456789012345 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9012345678901234567890123456 /* SettingsView.swift */; };
-		A123456789012345678901234567 /* PlantChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B23456789012345678901234567 /* PlantChatView.swift */; };
-		8A1F5914F2574A7D91943D11 /* SubscriptionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A399C042599047E59D19A993 /* SubscriptionService.swift */; };
-		C871829FBCF5441ABCB2E936 /* SubscriptionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A1BBBE6A96744C2930025A5 /* SubscriptionView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		075E31D4942F9BA051BEEAAA /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
-		115F189D809B6F22CD80974D /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
+		075E31D4942F9BA051BEEAAA /* .gitkeep */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitkeep; sourceTree = "<group>"; };
+		115F189D809B6F22CD80974D /* .gitkeep */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitkeep; sourceTree = "<group>"; };
 		24402A73212DDDBB0FCA19D2 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		3456789012345678901234567890 /* QRCodeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRCodeView.swift; sourceTree = "<group>"; };
 		35107907A60AF2CF75031C0B /* RootMateApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootMateApp.swift; sourceTree = "<group>"; };
-		3779E4FD1DAF309D5F6C10D5 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
+		3779E4FD1DAF309D5F6C10D5 /* .gitkeep */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitkeep; sourceTree = "<group>"; };
+		3797AC952F02D15A002AF02D /* RootMate.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = RootMate.entitlements; sourceTree = "<group>"; };
+		3A1BBBE6A96744C2930025A5 /* SubscriptionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionView.swift; sourceTree = "<group>"; };
 		43B45A08578403C3D43BD165 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		7C1BF79DA4B58414B6E69BC6 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
-		84CE18D163DD3643F88DB4AF /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
-		BDD55B34A12702B9E4C65A65 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
-		B2C3D4E5F678901234567890 /* Plant.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Plant.swift; sourceTree = "<group>"; };
-		C3D4E5F67890123456789012 /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
-		D4E5F6789012345678901234 /* PlantViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlantViewModel.swift; sourceTree = "<group>"; };
-		E5F6789012345678901234567 /* WeatherService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherService.swift; sourceTree = "<group>"; };
-		F6789012345678901234567890 /* AIService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIService.swift; sourceTree = "<group>"; };
+		4567890123456789012345678901 /* QRCodeGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRCodeGenerator.swift; sourceTree = "<group>"; };
 		67890123456789012345678901 /* MyRootmatesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyRootmatesView.swift; sourceTree = "<group>"; };
 		78901234567890123456789012 /* AISystemPrompts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AISystemPrompts.swift; sourceTree = "<group>"; };
-		3456789012345678901234567890 /* QRCodeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRCodeView.swift; sourceTree = "<group>"; };
-		4567890123456789012345678901 /* QRCodeGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRCodeGenerator.swift; sourceTree = "<group>"; };
+		7C1BF79DA4B58414B6E69BC6 /* .gitkeep */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitkeep; sourceTree = "<group>"; };
+		84CE18D163DD3643F88DB4AF /* .gitkeep */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitkeep; sourceTree = "<group>"; };
 		9012345678901234567890123456 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
-		B23456789012345678901234567 /* PlantChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlantChatView.swift; sourceTree = "<group>"; };
-		D345678901234567890123456789 /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
-		F345678901234567890123456789 /* APIConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIConfiguration.swift; sourceTree = "<group>"; };
-		G456789012345678901234567890 /* KeychainService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainService.swift; sourceTree = "<group>"; };
 		A399C042599047E59D19A993 /* SubscriptionService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionService.swift; sourceTree = "<group>"; };
-		3A1BBBE6A96744C2930025A5 /* SubscriptionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionView.swift; sourceTree = "<group>"; };
-		EF6B176BE8656606445CD881 /* RootMate.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = RootMate.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		B23456789012345678901234567 /* PlantChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlantChatView.swift; sourceTree = "<group>"; };
+		B2C3D4E5F678901234567890 /* Plant.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Plant.swift; sourceTree = "<group>"; };
+		BDD55B34A12702B9E4C65A65 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		C3D4E5F67890123456789012 /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
+		D345678901234567890123456789 /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
+		D4E5F6789012345678901234 /* PlantViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlantViewModel.swift; sourceTree = "<group>"; };
+		E5F6789012345678901234567 /* WeatherService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherService.swift; sourceTree = "<group>"; };
+		EF6B176BE8656606445CD881 /* RootMate.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RootMate.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		F345678901234567890123456789 /* APIConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIConfiguration.swift; sourceTree = "<group>"; };
+		F6789012345678901234567890 /* AIService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIService.swift; sourceTree = "<group>"; };
+		G456789012345678901234567890 /* KeychainService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainService.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
 		06A5DB2F563CC94129326016 /* RootMate */ = {
 			isa = PBXGroup;
 			children = (
+				3797AC952F02D15A002AF02D /* RootMate.entitlements */,
 				43B45A08578403C3D43BD165 /* Assets.xcassets */,
 				24402A73212DDDBB0FCA19D2 /* Info.plist */,
 				35107907A60AF2CF75031C0B /* RootMateApp.swift */,
-				5D302FE928FAB4CE8B03ABC2 /* Models */,
-				2DBE7FBC13ABC290D5550258 /* Network */,
-				4AED1359C8FA325FE447D3EB /* Resources */,
-				D5344C1DB46D306DC7F52AC9 /* Utilities */,
-				76BECF690F08F7BCA2C05621 /* ViewModels */,
-				8D22B77BA35350F340567874 /* Views */,
 			);
 			name = RootMate;
 			path = .;
@@ -189,7 +185,7 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
-				LastUpgradeCheck = 1500;
+				LastUpgradeCheck = 2620;
 			};
 			buildConfigurationList = 5569BD6DB373CECC02C343A6 /* Build configuration list for PBXProject "RootMate" */;
 			compatibilityVersion = "Xcode 14.0";
@@ -201,7 +197,6 @@
 			);
 			mainGroup = 08490E6BB191ED48497F1C2B;
 			minimizedProjectReferenceProxies = 1;
-			preferredProjectObjectVersion = 77;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
@@ -254,13 +249,19 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_ENTITLEMENTS = RootMate.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = QJANRR5HKM;
 				INFOPLIST_FILE = Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Root Mate";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.lifestyle";
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
+				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.rootmate.RootMate;
 				SDKROOT = iphoneos;
 				SWIFT_VERSION = 5.0;
@@ -305,6 +306,7 @@
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -325,6 +327,7 @@
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
@@ -335,13 +338,19 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_ENTITLEMENTS = RootMate.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = QJANRR5HKM;
 				INFOPLIST_FILE = Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Root Mate";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.lifestyle";
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
+				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.rootmate.RootMate;
 				SDKROOT = iphoneos;
 				SWIFT_VERSION = 5.0;
@@ -386,6 +395,7 @@
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
@@ -399,6 +409,7 @@
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 5.0;
