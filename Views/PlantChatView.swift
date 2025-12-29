@@ -165,32 +165,27 @@ struct PlantChatView: View {
                 }
             }
             .safeAreaInset(edge: .bottom) {
-                // Generate/View Message Button
-                Button(action: {
-                    if hasTodaysMessage, let todaysMessage = viewModel.getTodaysMessage(for: plant.id) {
-                        // Just load existing message
-                        message = todaysMessage.message
-                    } else {
-                        // Generate new message
+                // Only show button when no message is displayed yet
+                if message.isEmpty && !isLoading {
+                    Button(action: {
                         Task {
                             await generateMessage()
                         }
+                    }) {
+                        HStack {
+                            Image(systemName: "sparkles")
+                            Text("Get Today's Message")
+                        }
+                        .font(.headline)
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(Color(hex: "1B4332"))
+                        .cornerRadius(12)
                     }
-                }) {
-                    HStack {
-                        Image(systemName: hasTodaysMessage ? "bubble.left.fill" : "sparkles")
-                        Text(hasTodaysMessage ? "View Today's Message" : "Get Today's Message")
-                    }
-                    .font(.headline)
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity)
                     .padding()
-                    .background(hasTodaysMessage ? Color(hex: "1B4332").opacity(0.8) : Color(hex: "1B4332"))
-                    .cornerRadius(12)
+                    .background(Color(hex: "FDFBF7"))
                 }
-                .disabled(isLoading)
-                .padding()
-                .background(Color(hex: "FDFBF7"))
             }
             .onAppear {
                 checkForTodaysMessage()

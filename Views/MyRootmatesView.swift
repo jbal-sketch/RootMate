@@ -166,44 +166,11 @@ struct MyRootmatesView: View {
     // MARK: - Daily Messages Feed
     private var dailyMessagesFeed: some View {
         VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                Text("💬 Daily Messages")
-                    .font(.title2)
-                    .fontWeight(.bold)
-                    .foregroundColor(Color(hex: "1B4332"))
-                
-                Spacer()
-                
-                if !viewModel.recentMessages.isEmpty {
-                    Button(action: {
-                        // Generate messages for all plants that don't have today's message yet
-                        Task {
-                            for plant in viewModel.plants {
-                                // Only generate if no message exists for today
-                                if !viewModel.hasMessageForToday(for: plant.id) {
-                                    do {
-                                        _ = try await viewModel.generateDailyMessage(for: plant)
-                                    } catch {
-                                        print("Failed to generate message for \(plant.nickname): \(error)")
-                                    }
-                                }
-                            }
-                        }
-                    }) {
-                        HStack(spacing: 4) {
-                            Image(systemName: "sparkles")
-                            Text("Get All")
-                        }
-                        .font(.caption)
-                        .foregroundColor(.white)
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 6)
-                        .background(Color(hex: "1B4332"))
-                        .cornerRadius(12)
-                    }
-                }
-            }
-            .padding(.horizontal, 4)
+            Text("💬 Daily Messages")
+                .font(.title2)
+                .fontWeight(.bold)
+                .foregroundColor(Color(hex: "1B4332"))
+                .padding(.horizontal, 4)
             
             if viewModel.recentMessages.isEmpty {
                 // Empty state - encourage first message

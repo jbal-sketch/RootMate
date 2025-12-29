@@ -104,14 +104,14 @@ struct SettingsView: View {
                         .foregroundColor(.secondary)
                 }
                 
-                #if DEBUG
+                #if DEBUG && targetEnvironment(simulator)
                 Section(header: Text("Debug Options")) {
                     Toggle("Bypass Subscription Checks", isOn: Binding(
                         get: { subscriptionService.debugBypassEnabled },
                         set: { subscriptionService.debugBypassEnabled = $0 }
                     ))
                     
-                    Text("Enable this to test all premium features without a subscription. Only available in DEBUG builds.")
+                    Text("Enable this to test all premium features without a subscription. Only visible in Simulator.")
                         .font(.caption)
                         .foregroundColor(.secondary)
                 }
@@ -150,7 +150,7 @@ struct SettingsView: View {
     }
     
     private var subscriptionStatusText: String {
-        #if DEBUG
+        #if DEBUG && targetEnvironment(simulator)
         if subscriptionService.debugBypassEnabled {
             return "Premium Active (Debug Bypass)"
         }
@@ -171,7 +171,7 @@ struct SettingsView: View {
     }
     
     private var subscriptionDetailText: String {
-        #if DEBUG
+        #if DEBUG && targetEnvironment(simulator)
         if subscriptionService.debugBypassEnabled {
             return "Debug bypass enabled - All premium features unlocked for testing"
         }
