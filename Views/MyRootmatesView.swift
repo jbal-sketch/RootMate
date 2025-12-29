@@ -145,14 +145,12 @@ struct MyRootmatesView: View {
                 // Schedule notifications on app appear
                 scheduleNotificationsIfNeeded()
                 
-                // Generate initial welcome message for first-time users
+                // Generate messages - initial welcome for FTUE, then daily messages
                 let viewModelRef = viewModel
                 Task { @MainActor in
+                    // First: generate initial message for first-time users (one-time only)
                     await viewModelRef.generateInitialMessageIfNeeded()
-                }
-                
-                // Generate daily messages if it's past notification time
-                Task { @MainActor in
+                    // Then: generate daily messages if it's past notification time
                     await viewModelRef.generateDailyMessagesIfNeeded()
                 }
             }
